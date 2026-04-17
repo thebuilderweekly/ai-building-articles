@@ -1,0 +1,115 @@
+# What does an AI-native company look like?
+
+An AI-native company has a different org chart from a traditional company. Humans do strategy, taste, verification, and relationships. Agents do code, content, operations, and monitoring. The ratio of humans to agents is inverted from a traditional software company.
+
+That's the definition. The rest of this article traces the old org chart against the new one, names what belongs to humans and what belongs to agents, walks through an illustrative roster, and covers the two questions every AI-native founder runs into: hire a human or add an agent, and how you manage agents the way you used to manage people.
+
+## The traditional org chart
+
+A traditional software company at $5 million in annual revenue has a recognizable shape. Engineering is 15 to 25 people across frontend, backend, platform, and quality. Product has 3 to 5 people across management and design. Marketing has 3 to 5 across content, performance, and brand. Sales has 3 to 8 depending on motion. Customer success has 2 to 5. Operations, finance, and people cover another 3 to 5. The total lands somewhere around 50 to 70 humans.
+
+The shape exists because each function needed humans at roughly human throughput to produce output at the rate the business consumed it. Engineering output required engineers. Content output required writers. Support output required support reps. Multiplied across the stack, you ended up with 50 people doing the work of a $5M business.
+
+Most of those people were not producing output directly. A large share of their time went to coordination. Standups, reviews, handoffs, planning sessions, retros, roadmap meetings. The bigger the team got, the more coordination overhead absorbed the total hours. Every additional hire added a small amount of direct output and a growing amount of coordination cost. The cost was the price of operating at that scale with human-only throughput.
+
+This is not a criticism. It was the rational shape. Any of the functions you tried to cut would have starved a part of the business that needed covering. Companies that tried to run leaner either missed growth, burned out the team, or both.
+
+## The AI-native org chart
+
+An AI-native company doing the same kind of work has 2 to 5 humans and 5 to 20 named agents. The humans direct the agents, verify their output, and own the customer relationships that require a person on the other end. The agents do the work that used to require the 50-person org.
+
+The ratio is inverted. Where a traditional company had 50 humans and some software, an AI-native company has 3 humans and a stack of agents. The hours humans spend coordinating are lower because there are fewer humans. The hours humans spend doing work are lower because the work gets produced by agents. The hours humans spend verifying are higher than they used to be, because verification is the new scarce skill and the one thing the stack cannot yet do for itself.
+
+For a description of how this shift became economically possible, see [the economics of AI-native companies](/articles/economics-of-ai-native-companies). The short version is that the cost of producing output dropped to near zero, the value of good output did not, and the org chart is what changes when the cost curve shifts by two orders of magnitude.
+
+The AI-native org is not a smaller version of the traditional org. It is a different shape. The functions are still present. Engineering still happens. Marketing still happens. Support still happens. The humans who would have been hired into those functions are replaced by agents with owners, and the owners run several functions each.
+
+## What humans do in an AI-native company
+
+Four activities stay with humans in an AI-native company. Each one is a place where agents either cannot yet perform reliably or where human judgment is the specific value being sold.
+
+**Strategy.** What to build. Who to serve. What to ignore. Which bets to take. Which markets to enter or leave. Strategy is a sequence of decisions about allocation in the face of ambiguity, and the ambiguity is the part agents do not yet reduce. A founder who outsources strategy to an agent gets a strategy that optimizes for the agent's training data, which is the strategy of the last wave, not the next one.
+
+**Taste.** What ships at quality. What gets rewritten. What feels off even though every individual part passes. Taste is the human filter that says this output is good enough and this one is not. Agents can generate candidates. Humans pick which candidate ships. In content, product, and design, taste is the bottleneck that does not move.
+
+**Verification.** Is the agent's output actually correct. Is the code secure. Is the customer-facing message on brand. Is the research accurate. Verification is specific, detailed, and requires holding context about what correct means. For a longer treatment of why this is an engineering discipline and not a faith practice, see [what is trust in AI systems](/articles/what-is-trust-in-ai-systems).
+
+**Relationships.** Customer calls. Partnerships. Hiring. The conversations that build trust with humans outside the company. These are high-context, high-stakes, and sensitive to small cues that agents miss. The founder who takes the customer calls herself learns things no dashboard reveals. The founder who delegates customer calls to an agent loses the signal and usually loses the customer too.
+
+The pattern across the four is that each involves judgment under ambiguity with accountability that has to land on a named human. Strategy is a bet. Taste is a call. Verification is a ruling. Relationships are commitments. All four require a person who can be wrong and be held to it. That is why humans stay.
+
+## What agents do in an AI-native company
+
+The functions that used to drive most of the headcount are now the functions most amenable to agents. Code, content, operations, monitoring, research, routine decisions.
+
+**Code generation and review.** Agents write the first draft of features. Agents review diffs. Agents run test suites and triage failures. A human takes the cases that matter, merges the PR, and holds the accountability. The split works because most code is pattern matching against known shapes, and the pattern matching is what agents are now good at.
+
+**Content production.** Newsletters, docs, marketing pages, changelogs, social posts. Agents produce the draft. A human shapes it, corrects the voice, and ships it. The volume that used to require a four-person content team now comes from one human and a content agent with a tight feedback loop.
+
+**Operations.** Customer support triage, data entry, monitoring, routine reporting, invoicing. Operations is where the ratio between work and headcount shifts the hardest. A support queue that would have needed two reps can be triaged and partially answered by an agent, with humans touching only the escalations.
+
+**Monitoring.** Agents watching dashboards, catching anomalies, opening tickets. An agent that reads logs 24 hours a day for $30 of API spend replaces the equivalent of a part-time ops engineer on night shift. The value is not the writing. It is the vigilance.
+
+**Research and analysis.** Competitive intelligence. Market research. Background on a prospective hire. Technical research for an architecture decision. Agents produce the briefing. The human reads it with the same skepticism they would bring to any intern.
+
+**Routine decisions within tight guardrails.** Approving a refund under a dollar threshold. Routing a support ticket. Sending a follow-up on a lead that went cold. Each decision is narrow, bounded, and monitored. The guardrails are the design. The agent is the executor.
+
+The common property is that each of these functions has repeatable structure. The output looks similar across instances. The evaluation criteria can be specified. The cost of a wrong output is bounded because verification is cheap and reversal is fast. When those three properties hold, the function is a candidate for agent ownership. When they do not, the function stays with a human.
+
+## An illustrative roster
+
+One builder's setup, not the definitive model. The roster below is one implementation of the agent-team pattern. Any AI-native builder ends up with their own version. The shape is what matters, not the specific names or tools.
+
+**Chanakya (strategy).** Reviews the weekly state of the business. Produces a strategy brief. Challenges assumptions. Drafts the next bet. The founder reads the brief, argues with it, and decides. Chanakya does not decide. Chanakya prepares.
+
+**Socrates (voice and editorial review).** Reads every piece of content before it ships. Catches drift from the house style. Asks the questions a sharp editor would ask. Flags sentences that sound off. The founder takes or ignores each note.
+
+**CuePM (product management).** Maintains the backlog. Writes specs. Runs retrospectives against shipped features. Surfaces gaps between plan and reality. A human still owns the roadmap, but the administrative layer of product management runs on the agent.
+
+**CueCode (engineering).** Writes code. Reviews PRs. Runs tests. Opens follow-up tickets. A human reviews the hard cases and holds the commit authority.
+
+**Argus (monitoring).** Watches the stack. Alerts on anomalies. Opens incidents. Provides the first triage notes before a human reads the alert. The agent does not resolve incidents that matter. It triages so the human can resolve faster.
+
+**Minerva (knowledge synthesis).** Reads the raw material the team produces. Extracts themes, patterns, open questions. Writes the monthly synthesis that the founder uses for strategy and for the newsletter.
+
+Each of these is a role, not a tool choice. The implementation is interchangeable across providers. The pattern, though, is durable. Each agent owns a function, has a tight specification, runs on a schedule or a trigger, and reports to a named human. The humans are the directors. The agents are the operators. The relationship is the company.
+
+## The hiring question: human or agent?
+
+Every new need in an AI-native company asks the same question first. Human or agent.
+
+The answer depends on the role's mix of three properties: taste, accountability, and repeatability.
+
+**Repeatable work goes to agents.** If the task looks similar across instances, if the output can be specified, and if the evaluation is cheap, it is a candidate for an agent. Customer onboarding sequences, data enrichment, content drafting, code generation for known patterns. The repetition is where agents win.
+
+**Taste-heavy work goes to humans.** If the output requires judgment that cannot be specified in a prompt, the work goes to a human. Brand decisions, hiring, strategic direction, the final read on a customer-facing piece of content. Taste is the place agents still fall short.
+
+**Accountability-heavy work goes to humans.** If something goes wrong with this output, who picks up the phone. Contracts, partnerships, regulatory filings, public communications during an incident. The accountability stays with a person because only a person can be accountable in a way the counterparty accepts.
+
+The practical test for a new role is to write a one-sentence job description. If the sentence is repeatable, bounded, and the evaluation is mechanical, that is an agent. If the sentence has a judgment call at its center, that is a human. If it has both, split it. The human takes the judgment half. The agent takes the repetition half.
+
+This reframes what [an AI builder](/articles/who-is-an-ai-builder) actually does. The AI builder is not a solo operator who does all the work. The AI builder is the director of a small, named agent team.
+
+## The management question: how you manage agents
+
+Managing agents is not the same as managing people, but the disciplines are close enough that the lessons carry over.
+
+**Clear roles.** Each agent owns one function with a boundary. Scope creep on an agent produces drift, just like scope creep on a human. The agent's prompt is the job description. The job description is kept narrow on purpose.
+
+**Clear handoff contracts.** What input does the agent expect. What output does it return. What are the failure modes. An agent that produces output for a downstream agent needs a specification at the interface. Handoffs that are not documented become bugs.
+
+**Verification checkpoints.** Before an agent's output is considered final, a check has to happen. Sometimes the check is automated. Sometimes it is sampled. Sometimes a human reads every output. The checkpoint is how you prevent agentic debt, and the checkpoint is the difference between a team that operates and a team that accumulates risk.
+
+**Audit trails.** Every agent action logged with input, output, and timestamps. This is the operational minimum. Without an audit trail, you cannot diagnose a bad output or prove a good one. With an audit trail, you can run the management cycle the same way you would with a human team: review, feedback, adjustment, re-review.
+
+The management pattern is the same one that works on human teams. Roles. Contracts. Checkpoints. Records. What changes is the cadence and the unit of work. A human you manage once a week in a one-on-one. An agent you manage continuously through the prompt, the logs, and the dashboards. The rhythm is different. The discipline is not.
+
+For a longer treatment of what an agent team is and how it is structured, see [what is an agent team](/articles/what-is-an-agent-team).
+
+## Start
+
+Pick one function in your company today that is repeatable, bounded, and cheap to verify. Content drafting, support triage, monitoring, research, or onboarding are all fine candidates.
+
+Write the one-sentence job description for that function. Build the agent. Name it. Give it a single owner on the human side. Put the agent on a schedule or a trigger. Add a verification checkpoint before its output goes live. Keep the checkpoint active for the first month.
+
+Then ask the next hiring question. Human or agent. If the answer is agent, repeat the pattern. If the answer is human, hire a human whose job is to direct two more agents. The org chart you end up with is the shape of the company.

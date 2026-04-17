@@ -1,0 +1,89 @@
+# How do AI-native products make money?
+
+The business models that work for AI-native products are different from traditional SaaS. Per-seat pricing breaks down because agents, not humans, consume the product. Usage-based pricing, consumable credits, marketplace fees, and content monetization dominate the category.
+
+That's the definition. The rest of this article traces why the old model fails, the five models that work for 1 to 3 person teams, the open-core pattern for developer tools, the pricing psychology that solo builders keep getting wrong, and the distribution problem that kills more products than any pricing mistake.
+
+## Why per-seat pricing breaks in AI products
+
+Per-seat pricing assumed a human on the other side of the login. A seat meant a person who opened the product, did work, and produced value at roughly human throughput. One seat, one mouth, one throat to monetize. The math was tidy.
+
+AI products break that assumption. The consumer of the product is often an agent operating on behalf of a human. One human can direct 5 agents that each run 200 times a day. From the vendor's perspective, that looks like one seat producing 1,000 units of work. From the human's perspective, they are getting 1,000 units of value. The seat fee cannot track either reality. It underprices the high-utility customer and overprices the low-utility one.
+
+The failure is not a rounding problem. It is structural. Seat pricing assumes human throughput is the binding constraint on consumption. AI products relax that constraint. The moment a customer can automate their use of your product, your seat price becomes arbitrary. They either route the whole team through one seat and underpay, or they refuse to add seats that would have been natural in a human-only world and you lose expansion.
+
+Some companies tried to patch per-seat with active-user definitions, API add-ons, or tiered seats. The patches help at the margin. They do not fix the underlying mismatch. If agent usage is the real signal of value, you have to charge on agent usage. The pricing has to follow the consumption, not the headcount.
+
+## Five business models that work
+
+The models that hold up for AI-native products share one property. They scale with value delivered, not with human headcount. There are five that work in practice and that solo builders and small teams are using today.
+
+**Usage-based pricing.** Charge per API call, per token, per action, per completed unit of work. The incentive is aligned. The customer pays more as they get more. Model providers like Anthropic and OpenAI run on this. Transcription services, image generation, code execution sandboxes, and vector databases all run on variants of it. The risk is bill shock on the customer side, which you manage with caps, alerts, and predictable unit prices.
+
+**Subscription with caps.** A flat monthly fee for a tier, with a cap on usage and overage charges past the cap. Simple to understand. Predictable for the customer. Overage handles the power users without punishing the casual ones. Cursor, Perplexity Pro, and Linear's AI features use this shape. Cursor reportedly surpassed $100M in annual recurring revenue within 18 months of launching, mostly on this model. The structure lets you anchor on a round monthly price and still capture value from heavy users.
+
+**Freemium with consumable credits.** A free tier that lets anyone try the product, with paid credits that top up for heavy use. The free tier is marketing. The credits are revenue. This works when the cost of the first use is low and the value compounds fast. ChatGPT's free tier and Plus plan, v0's generation credits, Midjourney's image credits all fit this shape. The structure lets low-intent users in, monetizes high-intent users at the rate of their usage, and does not require a sales conversation.
+
+**Marketplace or platform fee.** Take a cut of transactions flowing through the product. Works for tools that intermediate between agents and the outside world: payment rails, booking flows, data marketplaces, affiliate networks. The platform does not pay unit costs in proportion to transaction volume, so the take rate drops straight to the bottom line. The catch is that you need two sides of a market, and building that is harder than building a tool.
+
+**Content or audience monetization.** The builder's output is the product. A newsletter, a course, a community, a paid research feed. AI is the lever that lets one person produce the volume and quality that used to require a team. Revenue comes from subscriptions, sponsorships, course sales, or paid community access. Independent operators at this layer routinely reach $10,000 to $50,000 MRR with hybrid setups that combine a free newsletter, a paid tier, and a course.
+
+The teams with durable revenue usually pick one primary model and add a second as a secondary channel. A SaaS product built on subscription with caps adds a usage-based API tier for developers. A content operator with a newsletter adds a cohort course twice a year. The mix hedges the model risk without diluting the core pricing story.
+
+## The open-core model for AI-native developer tools
+
+Open-core is worth separating from the five because it pairs with any of the revenue models above and has become the default pattern for AI-native infrastructure.
+
+The shape is familiar. You open source the engine. Developers can self-host, inspect the code, and build on top. You monetize the hosted version, enterprise features, and commercial support. PostHog, Supabase, and a long list of modern developer tools run on this pattern. The AI-native entrants are picking it up for the same reason: the engine is the product that developers want to trust, and trust is easier to earn when the code is readable.
+
+The model works because AI developer tools are infrastructure. Developers want to run infrastructure themselves when they can. Hosting, support, and enterprise features are the wrapper that most teams happily pay for because operating the infrastructure yourself is not the job they hired into. The open core lets you compete on adoption. The hosted product lets you compete on revenue. The two moves reinforce each other.
+
+Open-core does not work for every AI-native product. If the value is concentrated in hosted intelligence, the client is thin, and the developer audience is not your audience, the investment in an open repo pays back slowly. For infrastructure-flavored products, it is close to required.
+
+## Pricing psychology for solo builders
+
+Solo builders underprice their AI-native products by a factor of 3 to 10. The pattern is consistent enough to be a law.
+
+The mechanism is simple. The builder knows their unit costs. API fees. Hosting. The builder prices on cost plus a markup. A $0.30 API call gets priced at $1 to the customer. That pricing tells the customer the product is worth a dollar.
+
+The customer is buying an outcome. They want the problem solved. If the problem is "summarize 500 documents," the customer's alternative is hiring an intern, paying $500, and waiting a week. The AI-native product delivers the same outcome in 30 minutes for $10. The customer would pay $100 for that outcome and feel they won. The builder charges $3 and loses margin they had the right to keep.
+
+The shift is to price on the customer's alternative, not on your own cost. The alternative is the replacement cost of the outcome. It is usually a person-hour, a contractor day, an agency month, or a tool the customer already pays for. That is the anchor. Your cost is irrelevant to the customer's willingness to pay. The near-zero marginal cost of AI-native products is your margin, not your price.
+
+Two practical moves help. First, ask three customers what their alternative was and what it cost them. That gives you a band. Second, charge more than feels comfortable and watch the conversion. If conversion does not drop, you were underpriced. Raise again. Solo builders who do this disciplined pricing test their way to a price 3 to 5 times higher than their first guess within the first quarter.
+
+For more on the structural economics behind this, see [the economics of AI-native companies](/articles/economics-of-ai-native-companies). The pricing instinct that feels greedy is the only instinct compatible with the new cost curve.
+
+## The distribution problem
+
+Most AI-native products die from lack of users, not lack of features. Building the product is the easy part now. Reaching the buyer is the bottleneck.
+
+The reason is mechanical. AI drops the cost of building product. Competing products launch every week. The supply of software is high. Customer attention is fixed. The ratio of products to attention is worse every quarter. A product that is 20 percent better than the incumbent does not get found. A product that looks exactly like the 40 other products launched that month does not get clicked.
+
+Distribution comes from a small number of levers. A founder with an audience who can launch to 10,000 qualified readers on day one. A search angle where the product ranks on a real query. A partnership with a platform that puts the product in front of users who were already looking. A paid channel that converts at a unit economics that math on the price. Most solo builders have none of these at launch. They assume the product will be the distribution and the product is not the distribution.
+
+This is the funding question for AI-native companies. The [economics article](/articles/economics-of-ai-native-companies) argued that capital needed to build product has collapsed and that the funding question has shifted. The real use of capital now is distribution. You raise to buy ads, hire a growth person, sponsor the right newsletter, or run the paid channel experiments faster than revenue alone affords. The product is cheap. The market is not.
+
+The solo builder version of this is slower and cheaper. Write every week. Ship public case studies. Build in public on one channel where your buyer reads. Partner with a complementary tool for cross-promotion. The compounding on audience is real, and it is the only distribution lever you control on zero capital. Start before the product ships, not after.
+
+## Real numbers from real products
+
+Numbers ground the theory. These are reported ranges, published or inferred from public signals, as of early 2026.
+
+**Cursor.** Subscription with caps, priced at $20 per month for individuals and higher tiers for teams. Reportedly passed $100M ARR within 18 months. The model works because the usage cap discourages abuse while the price point is low enough for individual developers to expense on a credit card.
+
+**Perplexity Pro.** $20 per month, freemium anchor with a paid tier that unlocks advanced models and higher limits. Reached $50M ARR on this shape. The free tier does the marketing, the paid tier monetizes the heavy users.
+
+**v0 by Vercel.** Freemium with consumable credits. Free users get a handful of generations per day. Paid tiers unlock credit pools that refill monthly. This fits well when the cost per generation is real but small, and the customer's value per generation is much higher than the cost.
+
+**Independent operators.** Hybrid models combining a paid newsletter, a digital product, and a course routinely land operators in the $10,000 to $50,000 monthly revenue band. A few reach $100,000 and beyond. The mix is usually a $10-50 per month subscription plus a $500-2,000 course.
+
+The point of the numbers is not that you can copy them. It is that each price point maps to a specific shape of customer and a specific shape of value delivery. If you pick a shape that does not fit your customer, the price does not save you.
+
+## Start
+
+Pick one primary revenue model. Not two. Not three. One. Write it at the top of your pricing page and your product page.
+
+If your product scales with transactions or calls, use usage-based. If you have a flat value delivered each month, use subscription with caps. If you want to let casual users in, use freemium with credits. If you sit between agents and the world, take a platform fee. If your output is the product, sell the content.
+
+Then raise your price by at least 2x from your first guess. Watch conversion for two weeks. If it does not fall, raise again. Do this before you spend another week on features. The pricing is the product decision that compounds the longest, and most solo builders discover this only after 18 months of underpriced revenue.

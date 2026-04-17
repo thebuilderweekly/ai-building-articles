@@ -42,6 +42,123 @@
       "assignedTo": "tbw-ai",
       "publishedAt": "2026-04-17",
       "publishedAs": "what-is-trust-in-ai-systems"
+    },
+    {
+      "id": "what-is-an-ai-agent",
+      "pillar": "building",
+      "topic": "foundations",
+      "status": "published",
+      "publishedAt": "2026-04-17",
+      "publishedAs": "what-is-an-ai-agent",
+      "assignedTo": "tbw-ai"
+    },
+    {
+      "id": "what-is-prompt-engineering",
+      "pillar": "building",
+      "topic": "craft",
+      "status": "published",
+      "publishedAt": "2026-04-17",
+      "publishedAs": "what-is-prompt-engineering",
+      "assignedTo": "tbw-ai"
+    },
+    {
+      "id": "what-is-an-agent-team",
+      "pillar": "building",
+      "topic": "architecture",
+      "status": "published",
+      "publishedAt": "2026-04-17",
+      "publishedAs": "what-is-an-agent-team",
+      "assignedTo": "tbw-ai"
+    },
+    {
+      "id": "what-is-an-ai-native-product",
+      "pillar": "building",
+      "topic": "product",
+      "status": "published",
+      "publishedAt": "2026-04-17",
+      "publishedAs": "what-is-an-ai-native-product",
+      "assignedTo": "tbw-ai"
+    },
+    {
+      "id": "builder-toolkit-2026",
+      "pillar": "building",
+      "topic": "tools",
+      "status": "published",
+      "publishedAt": "2026-04-17",
+      "publishedAs": "builder-toolkit-2026",
+      "assignedTo": "tbw-ai"
+    },
+    {
+      "id": "what-is-agentic-debt",
+      "pillar": "economics",
+      "topic": "risk",
+      "status": "published",
+      "publishedAt": "2026-04-17",
+      "publishedAs": "what-is-agentic-debt",
+      "assignedTo": "tbw-ai"
+    },
+    {
+      "id": "how-do-ai-native-products-make-money",
+      "pillar": "economics",
+      "topic": "business-models",
+      "status": "published",
+      "publishedAt": "2026-04-17",
+      "publishedAs": "how-do-ai-native-products-make-money",
+      "assignedTo": "tbw-ai"
+    },
+    {
+      "id": "what-is-the-agent-as-customer-thesis",
+      "pillar": "economics",
+      "topic": "market-shift",
+      "status": "published",
+      "publishedAt": "2026-04-17",
+      "publishedAs": "what-is-the-agent-as-customer-thesis",
+      "assignedTo": "tbw-ai"
+    },
+    {
+      "id": "what-does-an-ai-native-company-look-like",
+      "pillar": "economics",
+      "topic": "organization",
+      "status": "published",
+      "publishedAt": "2026-04-17",
+      "publishedAs": "what-does-an-ai-native-company-look-like",
+      "assignedTo": "tbw-ai"
+    },
+    {
+      "id": "what-is-outcome-verification",
+      "pillar": "trust",
+      "topic": "verification",
+      "status": "published",
+      "publishedAt": "2026-04-17",
+      "publishedAs": "what-is-outcome-verification",
+      "assignedTo": "tbw-ai"
+    },
+    {
+      "id": "risks-of-ai-building",
+      "pillar": "trust",
+      "topic": "risk",
+      "status": "published",
+      "publishedAt": "2026-04-17",
+      "publishedAs": "risks-of-ai-building",
+      "assignedTo": "tbw-ai"
+    },
+    {
+      "id": "what-is-ai-accountability",
+      "pillar": "trust",
+      "topic": "accountability",
+      "status": "published",
+      "publishedAt": "2026-04-17",
+      "publishedAs": "what-is-ai-accountability",
+      "assignedTo": "tbw-ai"
+    },
+    {
+      "id": "what-is-human-in-the-loop",
+      "pillar": "trust",
+      "topic": "verification",
+      "status": "published",
+      "publishedAt": "2026-04-17",
+      "publishedAs": "what-is-human-in-the-loop",
+      "assignedTo": "tbw-ai"
     }
   ]
 }

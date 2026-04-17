@@ -1,0 +1,77 @@
+# What is an AI-native product?
+
+An AI-native product is one whose core value cannot exist without AI. Remove the AI, and the product disappears. An AI-enhanced product adds AI on top of existing value. Remove the AI, and the product still works, just worse. That's the definition.
+
+The difference sounds academic. It is not. It determines whether your product has a structural moat, whether your pricing holds when models commoditize, and whether a new company can copy you in a weekend. The words look similar. The businesses are not similar at all.
+
+Most founders get this wrong because the surface looks the same. Both types of product use large language models. Both charge subscriptions. Both market themselves with the phrase "powered by AI." Underneath, the two kinds of product are built on different assumptions about what a customer is paying for. You need to know which one you are building before you make a single architectural decision.
+
+## The enhancement-to-native spectrum
+
+There are four points on the spectrum. Each has a different center of gravity and a different shelf life.
+
+- **Pure non-AI products.** These are the older category most software still belongs to. A task manager. A CRM. A spreadsheet. The product was designed before AI was a tool available at reasonable cost. It may have an AI feature today, but the AI did not exist when the architecture was decided. Examples: Salesforce before Agentforce, Excel before Copilot, Jira before any of its AI add-ons. These products are safe in a specific way. They have revenue, distribution, and no dependency on model pricing. They are exposed in a different way. They cannot recapture users whose expectations have moved on.
+
+- **AI-enhanced products.** These are products with real pre-AI value that added AI as a layer. Grammarly is the cleanest example. It was a grammar checker for ten years before 2023. Then it added generative features: rewrite this paragraph, match this tone, draft a reply. The enhancement made it better. It did not make it different. Notion AI is similar. Notion was a document and database tool. Notion AI is a sidebar that drafts inside the document. Remove it, Notion still works. You get less. You do not get nothing.
+
+- **AI-mostly products.** These are products where the AI produces roughly 70% of the perceived value but sits on top of scaffolding that is worth something on its own. Linear with autonomous triage agents is in this zone. GitHub Copilot, depending on how you classify the IDE itself, sits near the boundary. The scaffolding matters because it decides what the AI is allowed to do and what the user sees. But if you stripped the AI out, you would have a version of the product that almost no one would pay the current price for.
+
+- **AI-native products.** These are products that could not have existed in 2022. Cursor is an AI-native product. Without a model that can edit code in context, it is a text editor with a chat window. Midjourney is AI-native. Without a diffusion model, there is no product at all. Perplexity is AI-native. Without a retrieval-plus-generation loop, it is a worse search engine that no one would use. Cognition's Devin, Claude Code, Replit Agent: all AI-native. The model is not a feature. It is the product.
+
+The point is not that one category is good and another is bad. The point is that the category you are in changes everything downstream, and most founders have not been honest with themselves about which category they are building in.
+
+## Why the distinction matters: structural moats
+
+Think about what gets commoditized first in any software market. The answer is the layer that is easiest to copy. For a pure non-AI product, that is usually the user interface. For an AI-enhanced product, it is almost always the AI layer itself.
+
+If you are running an AI-enhanced product, your AI features depend on calls to a model you do not own. The same model is available to your competitor. The same prompts can be reverse-engineered inside an afternoon by anyone who reads your product output. Your moat is not the AI layer. Your moat is the pre-AI product underneath it, which is now the less interesting part of what you sell.
+
+This is what happens next. A competitor launches with the same feature set, the same model, and better defaults. You have to ship a differentiated feature fast. But you cannot differentiate at the AI layer because the AI layer is a commodity. So you differentiate somewhere else and hope users notice.
+
+For AI-native products the picture inverts. The product is the architecture around the model. The prompts, the retrieval systems, the evaluation harnesses, the feedback loops, the scheduling, the memory, the verification layer. This is your moat. You are [building systems that produce output at scale](/articles/what-is-ai-building), not systems that wrap a model in a text box. Even if a competitor uses the same underlying model, they are still years away from matching the scaffolding you have built around it, because the scaffolding is the product.
+
+You can test this for any AI company you follow. Read the release notes for the last six months. If the updates are almost entirely about new AI features, they are probably AI-enhanced and their differentiation is thinning. If the updates are about new agent behaviors, new verification patterns, new ways the system coordinates work, they are AI-native and compounding.
+
+## The risk of being AI-enhanced
+
+The phrase you should hold in your head is this. An AI feature is a category, not a product. "Summarize this document." "Draft a reply." "Generate an image from this prompt." Each of these will appear in every document tool, every email client, every design tool within eighteen months of becoming technically possible. The first one ships as a differentiator. The last one ships as table stakes. Nothing you can do about it except hope you ship first.
+
+When a category becomes table stakes, its price goes to zero. That is what "commoditized" means. The feature still exists. Customers still use it. But no one pays a premium for it because every competitor has the same feature. If the AI layer is where your differentiation lives, and the AI layer is commoditizing, your pricing power goes with it.
+
+AI-native products are betting on a different thing. They are betting on their architecture. The architecture includes the system prompts, the context-gathering, the agent loops, the tools the model can call, the way the user is pulled in at the right moments and kept out of the wrong ones. This is what you are buying when you pay for Cursor, and this is what a fast follower cannot copy from a screenshot.
+
+The deeper point shows up in Vol XI of The Builder Weekly, [The End of Subsidized AI](/articles/what-is-ai-building). Model prices are not going to keep falling the way they fell between 2023 and 2025. Inference costs real money. The companies that depend on enhancement features at subsidized margins will have a painful year when the subsidy runs out. The companies whose architecture is the moat will charge more confidently because they are not selling raw model output. They are selling a system.
+
+## How to evaluate your own product
+
+Here is the test. Sit down with the product you are building or operating today. Describe what a user receives when they pay you. Not the marketing copy. The actual thing they get.
+
+Now mentally remove the AI. Every call to a model, every generative feature, every chatbot, every agent loop. Gone. What is left?
+
+- If the answer is "basically the same product with worse output," you are AI-enhanced. A human editor is slower than your AI editor. A manual categorizer is clumsier than your AI categorizer. But the workflow still functions. The product still has a reason to exist. You are in the enhancement category.
+
+- If the answer is "nothing, the product does not work at all," you are AI-native. Remove the image model from Midjourney and the screen goes blank. Remove the code agent from Cursor and it is just a text editor. Remove the reasoning from Perplexity and there is no answer. These products have no fallback because the fallback was never there.
+
+- If the answer is "something is there but no one would pay for it," you are in the AI-mostly zone. This is an unstable place to be. You have the cost structure of an AI-native product and the moat of an AI-enhanced one. Most AI-mostly products eventually migrate in one direction or the other. Either the scaffolding grows enough to matter on its own, or the AI layer grows enough to become the entire product.
+
+One more question, which matters for strategy. What happens to your product if the best model available to you gets 3x better next year? For AI-enhanced products, it makes your features a little better. For AI-native products, it can unlock entirely new product surfaces you could not build before. This is the asymmetry that [shapes the economics of AI-native companies](/articles/economics-of-ai-native-companies). Better models make enhancement features marginally better. Better models make native products qualitatively different.
+
+## Building and buying in each category
+
+The category you are in should tell you who you are competing with and who has the advantage.
+
+**AI-enhanced is safer for established companies.** If you are Salesforce or Atlassian or Microsoft, you already have distribution, trained users, a pricing relationship, and an installed product. Bolting AI onto that is lower-risk than starting from scratch. You do not need AI to be your moat because your moat is the existing business. You use AI to defend the existing business from AI-native challengers. The strategy is: stay close enough to the frontier that switching to a pure AI-native alternative is not worth the customer's pain. Microsoft is running this playbook. So is Adobe. So is, in a different form, Shopify.
+
+**AI-native is where new companies have the structural advantage.** A new company has no legacy to protect. It can design the product around what a 2026 model can do, not what fit inside a 2018 architecture. It can charge AI-native prices on AI-native gross margins. It can hire builders who think in agents, not builders who think in workflows. Cursor beat the incumbent IDEs by a factor you do not normally see in tooling markets. The reason is not that the incumbents were lazy. The reason is that their architecture could not absorb the AI-native workflow without tearing down the product. That is what legacy means.
+
+If you are running a company that is neither established nor truly AI-native, you are in the hardest position. You have the cost base of the new world and the moat of the old. This is where the risk is concentrated over the next two years. Vol XII of The Builder Weekly, [AI Alone Is Fragile](/articles/what-is-ai-building), makes the case that the most defensible AI-native products combine model output with something the model cannot produce. A data asset. A distribution channel. A community. A hardware relationship. The AI is necessary but not sufficient. That is the strongest AI-native position.
+
+There is a second pattern that is easier to miss. Some products that look AI-enhanced today are structurally AI-native once you look at what users actually do with them. Figma with its AI design features is one to watch. The AI looks like an addition, but the product roadmap keeps folding more of the design-making work into the model loop. Give it two more years and the question will be whether the original vector tool is a differentiator or a historical artifact. If the answer is historical artifact, Figma has transitioned from enhanced to native without renaming itself.
+
+## Start
+
+Pick one product you are shipping or planning today. Do the two-question test. First question: if you removed every AI feature, what would users see? Write the answer down in one sentence. Second question: if the best model you can call gets 3x better in a year, what new product surface do you unlock? Write that answer down too.
+
+If the first answer is "a working product" and the second is "marginal improvements," you are building AI-enhanced. Plan accordingly. Defend distribution. Keep your AI features at parity. Do not pretend the AI layer is your moat.
+
+If the first answer is "nothing" and the second is "a product that does not exist today," you are building AI-native. Plan for that too. The architecture around the model is what you sell. Invest there. Read [how to think about AI agents](/articles/what-is-an-ai-agent) next, because most serious AI-native products are agent products underneath. Then look at [who an AI builder actually is](/articles/who-is-an-ai-builder) and staff the team that way. The category of product you are building tells you everything else.

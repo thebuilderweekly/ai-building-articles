@@ -1,0 +1,105 @@
+# What is the "agent as customer" thesis?
+
+The "agent as customer" thesis is the observation that products are increasingly evaluated, chosen, and used by AI agents rather than humans. The buyer is still human. The user is increasingly an agent. Products designed for human users lose to products designed for agent users.
+
+That's the definition. The rest of this article traces what agents evaluate, what they ignore, why API reliability is becoming the moat, the infrastructure layer where the pattern is most visible, and what the shift changes about how you price, document, and design a product today.
+
+Govind Kavaturi published the agent-as-customer thesis on X and Medium, arguing that the buyer of software and the user of software are splitting, and that the split changes the rules of product design. The thesis travels well because every builder shipping an AI product can see their own agents behaving like customers inside other products. Your agent hits a pricing page. Your agent reads API docs. Your agent decides whether to keep using the vendor. The vendor has a new customer, and the new customer does not read marketing copy.
+
+## What agents evaluate differently from humans
+
+Agents evaluate software on properties humans rarely think about. The properties are mechanical, measurable, and unforgiving.
+
+**API reliability.** Does the endpoint return in a predictable amount of time. Does it return the same shape every call. Does it fail in ways the agent can recognize. A human tolerates a page that loads in 4 seconds. An agent chained inside a production workflow treats the same latency as a cost, compares it against alternatives, and routes around it at the first opportunity.
+
+**Documentation quality.** Is the reference complete. Are the types accurate. Are the examples runnable. An agent reads docs the way a compiler reads a header file. If the docs say the response has a field called `id` and the response returns `user_id`, the agent breaks. The human reader would shrug and figure it out. The agent cannot shrug.
+
+**Latency.** Every extra 200 milliseconds compounds across a chain of tool calls. A workflow that calls five APIs with 200ms of variance each inherits a full second of jitter at the top. Agents that are being optimized for production pick the faster vendor by default.
+
+**Predictable pricing.** Flat per-call pricing with clear rate limits beats complex pricing with enterprise tiers. An agent cannot negotiate. It cannot call sales. It picks the vendor whose pricing is mechanical enough to simulate in advance.
+
+**Failure modes that can be caught programmatically.** Clear HTTP status codes. Structured error bodies. Documented retry semantics. An agent that cannot tell a rate-limit error from a server error from a bad-request error cannot build reliable retries, so it deprioritizes the vendor or does not use it at all.
+
+The pattern is that agents care about the properties that used to be invisible to end customers. The customer experience a product team optimized for was the one the human saw in the browser. The agent experience is the one the SDK caller sees in production. The two are diverging.
+
+## What agents do not evaluate
+
+Agents are blind to everything they cannot read programmatically. That blindness is structural and is not going to close. The marketing layer that humans read is mostly invisible to an agent making a vendor choice.
+
+**Visual polish.** A beautiful landing page, a distinctive brand, a video that explains the product with style. An agent sees none of this. The agent sees the OpenAPI spec, the SDK, the pricing endpoint, and the error responses.
+
+**Onboarding videos.** A 90 second walkthrough that wins a human decision means nothing to an agent. The agent needs a quickstart that runs in a terminal.
+
+**Aspirational copy.** Taglines about transforming your business, delivering outcomes, or joining the future. Agents do not read this layer and cannot be swayed by it. Humans who hire agents to evaluate vendors are increasingly filtering it out on their own.
+
+**Unclear pricing.** A pricing page that says "contact sales" is invisible to an agent. The agent cannot fill out a form, wait for a response, negotiate a contract. Products that hide pricing lose the agent segment entirely, and that segment is growing.
+
+**Dark patterns.** Sticky upsells, confusing cancellation flows, complicated checkout steps designed to slip extra purchases past a distracted human. None of this survives an agent. An agent will either fail the flow or complete it exactly as specified, without the revenue lift the dark pattern was designed to produce.
+
+The blindness cuts both ways. The marketing team's work is invisible to the agent, which means a product that is great for agents can look underfunded or underpolished to a human buyer who is reviewing the landing page. That is the design problem this thesis creates, and the products that solve it win both segments.
+
+## Why API reliability is becoming the moat
+
+The moat for an AI-era infrastructure product is no longer the feature set. It is the reliability of the interface.
+
+Features get copied fast. A model vendor ships a new capability. Within 30 days, the other frontier labs match it. A DX improvement from one SDK shows up in competitor SDKs by the next release. Features depreciate at the speed of the field, which is faster than any moat built on them.
+
+Reliability compounds. The vendor with 99.99 percent uptime has two years of operational investment that a new entrant cannot replicate with code. The vendor whose response schema has not changed in 18 months has the trust of every agent builder who wrote against it. The vendor whose latency is predictable across regions has a routing story that agent-native customers can build on.
+
+When agents are choosing, reliability is the first-order property. A human can forgive flakiness because humans are flakey too. An agent running at scale cannot. The vendor that flakes gets removed from the retry pool, and the removal is permanent because nobody writes the vendor back in.
+
+Stripe is the clearest historical example. The API has been stable for long enough that generations of agent-style callers have built on it. The error format has been consistent long enough that every SDK generator in the world can consume it. The pricing has been predictable long enough that customers trust the bill. None of that is a feature. All of it is reliability compounded over time. It is the moat.
+
+The frontier model providers are running the same play in a faster loop. Anthropic, OpenAI, and Google each compete on model quality, but the underlying API, the SDK, and the error surface are what determine which one an agent builder writes against in production. A model that beats on benchmarks but ships with a flaky API loses the agent customer to a model that wins on reliability even if it is a step behind on capability.
+
+## Examples of agent-first products
+
+Agent-first products exist today and are growing faster than their human-first peers in the same categories.
+
+**Stripe.** API first since 2010. Docs are executable. Error codes are mechanical. Pricing is public and precise. Agents can integrate Stripe in minutes. Humans never needed to.
+
+**Anthropic, OpenAI, and Google model APIs.** The competition here is not primarily on brand or landing page. It is on tokens per second, on context length, on stability of the SDK, on pricing predictability, and on the quality of the response schema. All of those are properties an agent can read.
+
+**MCP and emerging agent protocols.** The Model Context Protocol is an explicit design for the agent-as-customer world. It specifies how agents discover, read, and use external tools through a standard surface. The protocol assumes that an agent is the one reading the capabilities, the parameters, and the errors. The UX is the schema.
+
+**Developer-focused tools with public API docs.** PostHog, Supabase, Resend, Twilio, PostHog. The teams that compete for developers already had agent-friendly instincts because developers are the most agent-like humans. Developers want docs over marketing, reliability over polish, and pricing pages that tell the truth.
+
+The pattern across these products is that the API is not an integration. The API is the product. The website, the landing page, the brand are a shell wrapped around the core asset, which is a reliable interface that an agent or an agent-like human can pick up and use without talking to anyone.
+
+## The infrastructure layer
+
+The next wave of category-defining products is being built at the infrastructure layer, where agent customers outnumber human customers by an order of magnitude inside a year.
+
+APIs are becoming the UI. For a growing class of products, the user interface is a collection of endpoints, a schema, and a set of conventions. The buyer is still a human and still wants a landing page to make the first decision. Everything past that decision is an agent doing the work. The landing page gets 10 seconds of attention. The API gets 100,000 calls.
+
+Agent-to-agent protocols are the next layer. MCP is the early standard. Tool-use patterns inside Claude, GPT, and Gemini are converging on shared shapes. The point of convergence is that a tool written for one agent should be usable by another with minimal adaptation. This extends the Stripe-style moat to every tool builder: if your tool fits the standard, it gets picked up. If it does not, it is invisible.
+
+Standardized tool-use patterns include function calling, structured outputs, streaming conventions, and retry semantics. These are not user-visible features. They are vendor-visible properties. The vendor that ships against the standard gets adopted by agent platforms. The vendor that invents its own shape has to build its own adoption. The standard wins because it is the agent-friendly path.
+
+For the longer argument about how the shift changes company economics, see [the economics of AI-native companies](/articles/economics-of-ai-native-companies). Agent-as-customer is the demand-side companion to the supply-side collapse that article describes.
+
+## What this changes about pricing, docs, and design
+
+The product surfaces that matter most are changing because the customer reading them is changing.
+
+**Docs become more important than the website.** The reference, the quickstart, the SDK examples, the error catalog. These are the surfaces an agent reads. They are the ones a human reads too when evaluating an agent-friendly vendor. The home page still matters, but the docs are the sales engine. Vendors who ship great docs win the agent segment before the sales team knows there was a sale.
+
+**Pricing tables become more important than case studies.** A case study is a story told to a human. It does not help an agent decide. A clear pricing table with rates, limits, and overage behavior is the structure an agent can simulate against. Publish the price, or lose the agent.
+
+**Stability guarantees become a sales driver.** Versioned APIs with long deprecation windows. Semantic versioning on SDKs. Commitments to response schema. These used to be buried in an enterprise contract. They are now a reason an agent builder picks you on the first try.
+
+**Error surfaces become a design priority.** Structured errors, stable error codes, clear retry hints. The error path is where unreliable vendors lose agent customers. Designing the error surface is now a first-class design task, as important as the happy-path API.
+
+**Onboarding becomes code, not copy.** A working curl example that returns a real response. A three-line SDK snippet that an agent can execute in a sandbox. A test account with a live API key and a usage cap. These are the onboarding assets that matter.
+
+**Support becomes asynchronous and documented.** An agent cannot file a Zendesk ticket and wait four hours. Public status pages, changelog feeds, and well-scoped error responses take the place of a support queue for the agent segment.
+
+For a parallel treatment of how agent identity shapes product decisions, see [what is an AI agent](/articles/what-is-an-ai-agent). The agent-as-customer thesis only makes sense once you have a clear picture of what an agent is and is not.
+
+## Start
+
+Audit your product's API. Read your own docs cold. Would an agent pick it over a competitor's?
+
+Pick three questions. Can a new SDK caller complete a useful action in 3 minutes with only the public quickstart? Is your pricing page mechanical enough for an agent to simulate a bill without calling sales? Does every error in your API surface a stable code, a message, and a retry hint?
+
+If any answer is no, that is the first fix. The agent customer is already choosing. The vendors that are easy to pick win. The vendors that are hard to pick lose, regardless of how their website looks. Design for the reader you cannot see.

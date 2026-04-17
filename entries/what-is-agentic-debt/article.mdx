@@ -1,0 +1,95 @@
+# What is agentic debt?
+
+Agentic debt is the AI-era equivalent of technical debt. It is the gap between what your agents produce and what you have verified they produce correctly. It accumulates silently, compounds, and eventually forces expensive paydown.
+
+That's the definition. The rest of this article unpacks how the debt accumulates, why it is worse than the technical debt you already know how to manage, what it looks like when it breaks, how you measure it before it breaks, and how you pay it down without rebuilding the agent from scratch.
+
+The term agentic debt was introduced by Govind Kavaturi, who has written about the pattern on X and Medium. The framing caught on among builders because it names something that was already happening in practice. Teams were shipping agent-driven features with no verification layer, watching output quality drift, and finding the drift only after a customer escalated. The pattern needed a name so builders can argue about it, measure it, and push against it inside their own teams.
+
+## How agentic debt accumulates
+
+You ship an agent. The output looks right. You move on. That is the whole mechanism.
+
+Each of those three actions is individually reasonable. An agent that produces correct output on the demo cases is ready to ship. Output that passes your own eye test is output you are willing to defend. Moving on is how you make progress on the next thing. The problem is that each action creates a small unverified surface area, and you are shipping agents faster than you are building the verification infrastructure that catches their drift.
+
+A typical solo builder's stack has 5 to 15 agents doing real work within three months of starting. Customer support triage, content generation, data enrichment, code review, monitoring alerts, onboarding emails, competitive research, sales outreach drafting. Each one was built in an afternoon. Each one runs on its own. None of them have automated checks. The builder reads the output of each agent for the first few days and then stops reading because the output looks fine.
+
+At this point the debt is live. Every hour the agents run, they produce output that nobody is checking. Most of it is correct. Some of it is not. The incorrect output goes out to customers, into documents, into decisions. The builder does not know which is which because the verification layer does not exist.
+
+**The accumulation pattern has four steps.** Skip verification because you are moving fast. Skip monitoring because you are moving fast. Trust the model because it worked in testing. Ship and move on to the next thing. Every agent shipped this way adds to the stack. The debt grows at the rate you ship agents, not at the rate you ship bugs.
+
+## Why agentic debt is worse than technical debt
+
+Technical debt slows you down visibly. Build times get longer. The test suite starts taking 15 minutes. A feature that used to take two days takes five. You feel the friction. The pain shows up in your own calendar before it shows up in customer complaints. The feedback loop is tight enough to act on.
+
+Agentic debt does not show up in your calendar. The code still works. The agent still runs. The output still looks right on a spot check. Nothing in your day gets harder. What changes is the rate at which bad output reaches users, and you have no instrumentation for that rate. The only signals you get are the ones your users volunteer, and users volunteer signals slowly and incompletely.
+
+The failure mode is silent by default. A support agent sends 2,000 responses this month. Ten are subtly wrong in ways that misrepresent your refund policy. The customers who read those responses do not write back to complain. They update their internal belief about your product and stop using it. You will not find out for a quarter. By then another 6,000 responses have gone out, and you do not know which ten of those were also wrong.
+
+This is the core asymmetry. Technical debt has a tight feedback loop with the builder. Agentic debt has a long feedback loop with the customer, and the customer often does not close the loop at all. You are not paying interest on this debt in a way you can see. You are paying it in lost retention, lost trust, and degraded decision quality that shows up months later in metrics you cannot easily trace back to the agent that caused them.
+
+For a longer treatment of why verification is an engineering problem and not a faith problem, see [what is trust in AI systems](/articles/what-is-trust-in-ai-systems). The agentic debt framing is the economic companion to the trust framing. Trust is the property you are trying to achieve. Agentic debt is what you are carrying when you do not achieve it.
+
+## Real examples of agentic debt in the wild
+
+The failure modes are specific. Naming them is useful because the pattern is hard to see in the abstract and obvious once you see the concrete cases.
+
+**Wrong data in customer-facing reports that nobody caught for weeks.** A data agent pulls numbers from a source, transforms them, and writes a weekly client report. The source schema changes. The agent does not notice. Reports ship with numbers that are off by a factor of ten. The client uses those numbers to make planning decisions. The mistake is caught a month later when a new analyst joins the client team and questions a figure.
+
+**Incorrect research briefs used to make decisions.** A research agent summarizes market data into a brief for the founder's morning review. The agent confidently invents a statistic about competitor growth. The founder uses that statistic in a pitch meeting. The investor looks it up and cannot find the source. The founder realizes they have been citing fabricated numbers for weeks.
+
+**Hallucinated legal citations.** A legal research agent produces memos that cite cases that do not exist. Lawyers who rely on the agent file briefs with the fake citations. Judges sanction the lawyers. This has happened publicly enough times that the pattern has a name, and it is the most visible form of agentic debt in the market.
+
+**Inaccurate support responses that train customers to distrust the product.** A support agent confidently answers product questions with wrong information. Customers find out through experience that the agent is wrong. They stop trusting anything the company says. Churn follows. The company blames messaging when the cause is the unverified agent.
+
+**Security vulnerabilities in generated code that passed review.** A coding agent produces implementations that include SQL injection, exposed secrets, or flawed authentication. The human reviewer scans the diff, sees reasonable-looking code, approves the PR. The vulnerability ships. It is found by a pen test if you are lucky or by an attacker if you are not.
+
+**Agent loops that burn through credits overnight.** An agent calls another agent which calls the first agent. Nobody built a stop condition. The loop runs for 14 hours. By morning the API bill is $8,000. The debt here is not just the bill. It is that you did not have alerting that would have caught the loop in the first hour.
+
+Every one of these is a case where the agent did its job the way it was specified, and the specification was incomplete. Agentic debt is the distance between the specification that got shipped and the specification that would have been complete.
+
+## How to measure agentic debt
+
+You cannot fix what you cannot count. Three metrics give you enough signal to act.
+
+**Percentage of output manually verified in the last 30 days.** For each agent, what share of its output did a human actually look at and confirm correct? For most teams, the honest answer is under 5 percent. That number is the one you are trying to raise.
+
+**Number of distinct verification systems in place per agent.** Automated checks, sampling audits, user feedback loops, anomaly detection, schema validation, output diffing against a known-good baseline. Count them. For a new agent, the count is often zero. For a production agent that you are betting the business on, the count should be at least two.
+
+**Time between an agent action and the first human or automated check of its output.** This is latency to verification. For an agent that sends email to customers, the latency should be measured in seconds, not days. For a research agent that writes internal briefs, hours is fine. The question is whether the latency is bounded at all. If verification happens only when a customer complains, the latency is unbounded, and your debt is high.
+
+If you cannot answer these three questions for your agents, your debt is higher than you think. That is the useful diagnostic. The answers do not have to be good. They have to exist. A team that knows its verification rate is 3 percent is better off than a team that has never computed it.
+
+## How to pay agentic debt down
+
+You pay it down one agent at a time, starting with the highest-stakes output. The mistake is to try to build a universal verification system. The better move is to pick the agent whose failures would hurt most and retrofit verification onto that one.
+
+**Start with the highest-stakes output.** Rank your agents by what a single wrong output costs. Customer-facing first. Decision-support second. Internal-only last. The paydown order is the inverse of the failure cost.
+
+**Add a sampling audit.** Once a week, pull 10 percent of that agent's output at random and have a human read it. Keep a log of what was wrong. After a month you have a baseline error rate. After three months you have a trend. This is the cheapest verification system you can build and the one that most teams skip.
+
+**Add automated checks where possible.** Schema validation for structured output. Regex or string checks for forbidden content. Diff against a reference answer for repetitive tasks. LLM-as-judge checks for subjective quality, with a human audit on the judge itself. Each check is narrow. A stack of narrow checks catches most of what you care about.
+
+**Build a dashboard that surfaces the unverified portion.** For every agent, show the verification rate, the sampled error rate, and the latency to first check. Put the numbers somewhere you look every week. The purpose of the dashboard is to make debt visible, so the team stops shipping new agents without thinking about the debt of the old ones.
+
+**Make verification a shipping gate.** New agents do not go live without at least one verification system. That is the cultural change. It is the agent-team equivalent of "no new feature without a test." You do not need a comprehensive harness. You need a floor.
+
+The [accountability loop tutorial](/tutorials/accountability-loop) walks through one implementation of this pattern. The principle is the same across implementations: before an agent's output is considered done, a check has to happen. The check can be automated, sampled, or fully manual. What matters is that it exists.
+
+## The compounding risk of fragile agent stacks
+
+Volume XII of The Builder Weekly made the case that AI alone is fragile. The article argued that individual models fail in ways that are hard to predict and that production systems need orchestration, verification, and human oversight to be reliable. Agentic debt is the operational footprint of ignoring that argument.
+
+When you skip verification across many agents, the failures are not independent. One agent's bad output becomes another agent's input. A content agent that hallucinates gets read by a research agent that summarizes it. The summary goes to a decision agent that acts on it. One hallucination at the top of the chain becomes an action at the bottom. The chain hides the error from the only human who was positioned to catch it.
+
+The economics follow the fragility. The [economics of AI-native companies](/articles/economics-of-ai-native-companies) piece described how solo builders can now reach revenue with near-zero capital because the cost of producing output dropped to near zero. Agentic debt is the counter-pressure on that trend. If your agents are producing unverified output at scale, your cost of producing good output is not zero. It is high, and it is deferred, and it is going to be paid by someone. Usually the customer. Sometimes the business.
+
+The builders who win the next phase will be the ones who keep the production speed of the AI-native stack and add back the verification discipline that the first wave of AI tools skipped. The ones who stay fast and sloppy will find out what agentic debt feels like on the other side of a quarterly review.
+
+## Start
+
+Pick your three most production-facing agents. For each, answer these three questions on paper.
+
+What percentage of its output has a human looked at in the last 30 days? How many verification systems does it have in place? How long between an action and the first check? If any answer is zero or close to it, that agent is your starting point. Add a 10 percent sampling audit this week. Track the error rate. Pick one more agent next week. Repeat until you have a verification floor across the stack.
+
+The goal is not perfect coverage. The goal is to stop the debt from growing faster than you can pay it down. Once the curve bends, the rest is maintenance.

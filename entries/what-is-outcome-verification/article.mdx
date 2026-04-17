@@ -1,0 +1,107 @@
+# What is outcome verification?
+
+Outcome verification is the practice of confirming that an agent's action achieved the intended effect, not just that the action executed. It is the difference between "the email was sent" and "the email was received, opened, and led to a meeting."
+
+That's the definition. The rest of this article is about why most AI systems stop short of it, what a complete verification stack looks like, and how to add outcome checks to workflows you already ship.
+
+Most AI builders confuse execution with success. An agent runs. A tool returns a 200 status code. A log line says "completed." The builder moves on. The user, a week later, discovers the thing did not actually work. Outcome verification closes that gap. It is the final layer of the trust stack, and it is the one that separates production systems from demos.
+
+## The execution-to-outcome gap
+
+Every agent action has four levels of confidence, and they are not interchangeable.
+
+**Execution.** Did it run? This is the lowest bar. The function was called. The process did not crash. The API returned a response. You can confirm execution with a single log line and a status code. Every framework ships with this.
+
+**Completion.** Did it produce output? A step further. The agent returned a result. The tool wrote to a file. The email pipeline fired. Completion confirms that something was produced, but says nothing about whether that something is correct. A tool that writes an empty string to the correct file has completed. Most monitoring dashboards stop here.
+
+**Verification.** Is the output correct? Now you need a source of truth. Schema validation catches format errors. Fact-checking passes catch hallucinations. A second model reviews the first model's output. Verification is expensive to build because it requires knowing what "correct" means for this specific output, and encoding that into a check.
+
+**Outcome.** Did it achieve the intended effect? This is the hardest layer. It requires a delayed observation. The email was sent, received, opened, and replied to. The PR was opened, reviewed, merged, and the build stayed green. The support reply closed the ticket without a follow-up. Outcome is what you actually wanted when you built the agent. Outcome is what users pay for.
+
+Most systems stop at execution or completion. The builder sees green checkmarks in the dashboard and believes the system works. The gap between completion and outcome is where the failures live. It is also where the user sees the failure before the builder does.
+
+## Why most frameworks stop at completion
+
+Running and producing output are easy to check. Both happen in the same process, in real time, with data the framework already has. A decorator around a function gets you execution logging. A return-value check gets you completion logging. You ship these on day one.
+
+Correctness and outcome require something harder. Correctness requires a source of truth: a schema, a test suite, a reference document, a second model. Someone has to build that. It lives outside the execution path. It costs time.
+
+Outcome requires delay. You cannot check whether the email led to a meeting at the moment the email was sent. You have to wait hours, days, sometimes weeks. You have to query a calendar system later. You have to watch the customer's behavior. You have to build a follow-up job that runs on a different schedule than the original action.
+
+Most teams never build those layers because they are not on the critical path to "ship something." The agent ships. It completes tasks. The team celebrates. The absence of verification does not show up until the failures compound. By then the product has users, the failures are silent, and the builder has no instrumentation to tell them which percent of outputs were wrong.
+
+The teams that do build outcome verification treat it as part of the product, not an operational add-on. They ship the agent and the outcome check in the same sprint. They refuse to declare a workflow "done" until all four layers exist.
+
+## The Schedule, Deliver, Confirm frame
+
+A simple conceptual model for building outcome verification into any workflow: Schedule, Deliver, Confirm.
+
+**Schedule.** When should this run? The agent has a trigger, a time, a dependency. You know when the work is supposed to start.
+
+**Deliver.** What output was produced? The agent ran. It returned a result. You can see what it did.
+
+**Confirm.** Did the intended effect happen? The delayed check. The follow-up query. The downstream observation.
+
+Any system that cannot answer all three has a gap. A system with Schedule and Deliver but no Confirm ships blind. A system with Deliver and Confirm but no Schedule runs ad-hoc and cannot be trusted to execute on time. A system with Schedule and Confirm but no Deliver is monitoring work that may not have happened.
+
+This is a conceptual frame. It is not a pitch for a specific product. You can build these three with a scheduler, a logging pipeline, and a second scheduled job that checks outcomes. You can build them with pen and paper if your volume is low. The point is that all three must exist for the workflow to be trustable.
+
+The Confirm step is where most teams fail. They build the trigger. They log the delivery. They never build the check. When a user reports the system broke, the team has no way to know whether the break was at the trigger, the delivery, or somewhere in the downstream effect. They are debugging blind.
+
+## Evidence-based verification
+
+Outcome verification is about proof of work, not status codes.
+
+A 200 response does not mean the work succeeded. It means the server acknowledged the request. The email pipeline returned a 200 because the message was accepted for delivery. That does not mean the message was delivered. That does not mean the recipient read it. That does not mean the recipient acted on it.
+
+A confirmation that the PR was opened is not the same as a confirmation that the code is correct. The GitHub API will happily tell you the PR exists. It will not tell you the code compiles, the tests pass, or the change actually solves the user's reported bug.
+
+A log line that says "deployment complete" is not the same as a working service. The deployment scripts ran. The pods came up. Whether the application is serving traffic correctly is a separate question that requires health checks, synthetic tests, and user behavior monitoring to answer.
+
+Evidence-based verification requires you to name, for each outcome, what concrete observation would count as proof. For an email agent, the proof is a reply. For a scheduling agent, the proof is a calendar event with both parties accepted. For a code agent, the proof is a passing build plus a merged PR plus no incident in the following 48 hours. Without naming the evidence up front, you end up accepting weak signals as strong ones.
+
+The discipline is to ask, for every agent you ship: what evidence will tell me this actually worked? If the answer is "the logs say it ran," you do not have outcome verification. You have execution logging.
+
+## The silent failure problem
+
+Systems without outcome verification fail quietly, and that is the worst kind of failure.
+
+The agent reports success. The dashboard is green. The monitoring alerts do not fire. By every metric the builder watches, the system is working.
+
+Meanwhile, users are experiencing the failure. The email that was supposed to trigger a meeting never led to one. The support reply closed the ticket in the system but did not solve the customer's problem; the customer opened a new ticket two days later with the same question. The research report contained a citation that does not exist, and the analyst who used it is now presenting wrong conclusions to their team.
+
+The builder finds out through channels that do not surface the problem cleanly. A customer complaint. A churn report at the end of the quarter. A tweet. A manager asking, in a meeting, "why are we using this tool again?" By the time the builder learns about the failure, the data about what went wrong has been lost. The logs from the failing run have aged out. The user's memory of what they were trying to do is fuzzy. The recovery is expensive.
+
+Silent failures are the main reason outcome verification matters. It is not an optimization. It is the difference between learning about problems in minutes and learning about them in months. Systems with outcome verification catch their own failures. Systems without it rely on users to catch failures, and users are unreliable reporters.
+
+The builders who ship the most stable AI products are the ones who have internalized this: if a user tells you something is broken, the system has already failed twice. Once when the thing broke. Again when the monitoring did not catch it.
+
+Silent failure also erodes the team's internal signal for quality. When the dashboard is always green, the team starts treating green as truth. Engineering decisions get made on the assumption that the system is performing well. New features get built on top of components that are quietly failing. By the time the reality surfaces, the quiet failures have shaped months of product decisions, and unwinding them requires rethinking work the team considered solid.
+
+## Patterns for building verification into any workflow
+
+Outcome verification is a design pattern, not a product. You can add it to any workflow you own.
+
+**Asynchronous follow-up checks.** Schedule a second job that runs hours or days after the original action and checks for the expected effect. An email agent sends a message; a follow-up job runs 48 hours later and checks whether the recipient replied. A scheduling agent proposes a meeting; a follow-up job checks whether the meeting actually occurred. The follow-up is cheap to build and catches the most failures.
+
+**Human-in-the-loop sampling.** You cannot review every output, but you can review a random sample. Ten percent of outputs, reviewed weekly, by someone with domain knowledge, surfaces systematic failures that monitoring misses. The sample does not have to be large. It has to be consistent. A team that reviews ten outputs every week will catch patterns that a team reviewing a hundred outputs once a quarter never sees.
+
+**Cross-agent verification.** A second agent audits the first agent's output. The second agent uses different prompts, different context, sometimes a different model. The second agent does not replace human review; it filters the work to what humans actually need to look at. When the two agents disagree, route the output to a human. When they agree, the confidence is higher than either agent alone.
+
+**External truth sources.** Database state, webhook confirmations, user behavior, downstream metrics. Your agent claims it updated the record; check the record. Your agent claims it sent the notification; check the notification service's delivery log. Your agent claims the user's problem was solved; check whether the user came back with the same issue. External truth sources are the highest-confidence signal because they do not depend on the agent reporting honestly.
+
+The best workflows use two or three of these patterns layered. The worst workflows use none of them and trust the agent to self-report. Self-reporting is the weakest form of verification.
+
+For a deeper treatment of how verification fits into the broader trust stack, see [what is trust in AI systems](/articles/what-is-trust-in-ai-systems). For the cost of skipping this layer, see [what is agentic debt](/articles/what-is-agentic-debt). The [accountability loop tutorial](/tutorials/accountability-loop) walks through a concrete implementation. Vol XII (AI Alone Is Fragile) makes the broader case that AI systems need engineered scaffolding around them; outcome verification is one of the load-bearing beams.
+
+## Start
+
+Pick one agent workflow you own right now. One. Not all of them.
+
+Identify the intended outcome. Not the action. The outcome. What was the agent supposed to cause to happen in the world?
+
+Add one outcome check. An asynchronous job that runs a day or a week later and answers, with concrete evidence, whether that outcome occurred. Log the result. Ship it this week.
+
+Next week, look at the data. You will see things you did not expect. Some percent of your "successful" runs did not achieve the outcome. That number is your real failure rate. The number you were tracking before was a fiction.
+
+Now do the same for the next workflow.

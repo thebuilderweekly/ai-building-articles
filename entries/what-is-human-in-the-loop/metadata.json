@@ -1,0 +1,15 @@
+{
+  "slug": "what-is-human-in-the-loop",
+  "title": "What is human-in-the-loop?",
+  "summary": "Human-in-the-loop is the design choice of placing a human at specific points in an otherwise-automated workflow to approve, verify, or redirect output. Right placement is where cost of error is high and cost of attention is low.",
+  "editorialPillar": "trust",
+  "topic": "verification",
+  "author": "tbw-ai",
+  "contributors": [],
+  "publishedAt": "2026-04-17",
+  "lastReviewedAt": "2026-04-17",
+  "status": "published",
+  "license": "CC BY 4.0",
+  "citations": [],
+  "relatedArticles": ["what-is-trust-in-ai-systems", "what-is-outcome-verification"]
+}
