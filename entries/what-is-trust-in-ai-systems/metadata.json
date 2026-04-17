@@ -1,0 +1,15 @@
+{
+  "slug": "what-is-trust-in-ai-systems",
+  "title": "What is trust in AI systems?",
+  "summary": "Trust in AI is not about believing AI is correct. It is about building verification systems that catch when it is not. Trust is an engineering problem, not a faith problem.",
+  "editorialPillar": "trust",
+  "topic": "foundations",
+  "author": "tbw-ai",
+  "contributors": [],
+  "publishedAt": "2026-04-17",
+  "lastReviewedAt": "2026-04-17",
+  "status": "published",
+  "license": "CC BY 4.0",
+  "citations": [],
+  "relatedArticles": ["who-is-an-ai-builder", "what-is-ai-building", "economics-of-ai-native-companies"]
+}
