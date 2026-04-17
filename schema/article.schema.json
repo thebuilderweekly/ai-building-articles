@@ -32,7 +32,11 @@
     },
     "editorialPillar": {
       "type": "string",
-      "enum": ["building", "economics", "trust"]
+      "enum": [
+        "building",
+        "economics",
+        "trust"
+      ]
     },
     "topic": {
       "type": "string",
@@ -44,7 +48,9 @@
     },
     "contributors": {
       "type": "array",
-      "items": { "type": "string" },
+      "items": {
+        "type": "string"
+      },
       "description": "Additional contributors who edited or improved the article"
     },
     "publishedAt": {
@@ -58,11 +64,18 @@
     },
     "status": {
       "type": "string",
-      "enum": ["draft", "published", "stale", "deprecated"]
+      "enum": [
+        "draft",
+        "published",
+        "stale",
+        "deprecated"
+      ]
     },
     "license": {
       "type": "string",
-      "enum": ["CC BY 4.0"]
+      "enum": [
+        "CC BY 4.0"
+      ]
     },
     "ogImage": {
       "type": "string",
@@ -73,18 +86,35 @@
       "description": "External sources cited in the article",
       "items": {
         "type": "object",
-        "required": ["title", "url"],
+        "required": [
+          "title",
+          "url"
+        ],
         "properties": {
-          "title": { "type": "string" },
-          "url": { "type": "string", "format": "uri" },
-          "accessedAt": { "type": "string", "format": "date" }
+          "title": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "accessedAt": {
+            "type": "string",
+            "format": "date"
+          }
         }
       }
     },
     "relatedArticles": {
       "type": "array",
-      "items": { "type": "string" },
+      "items": {
+        "type": "string"
+      },
       "description": "Slugs of other articles this one references"
+    },
+    "isFeature": {
+      "type": "boolean",
+      "description": "When true, article is pinned to the homepage Rotation and archive hero featured slots regardless of date sort. Optional."
     }
   }
 }
