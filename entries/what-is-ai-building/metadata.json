@@ -1,0 +1,15 @@
+{
+  "slug": "what-is-ai-building",
+  "title": "What is AI building?",
+  "summary": "AI building is directing AI to produce output that works at scale. Not using AI casually. Building with it. The distinction between asking a question and creating a system that produces answers repeatedly.",
+  "editorialPillar": "building",
+  "topic": "foundations",
+  "author": "tbw-ai",
+  "contributors": [],
+  "publishedAt": "2026-04-17",
+  "lastReviewedAt": "2026-04-17",
+  "status": "published",
+  "license": "CC BY 4.0",
+  "citations": [],
+  "relatedArticles": ["who-is-an-ai-builder"]
+}
