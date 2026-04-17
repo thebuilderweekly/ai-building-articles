@@ -1,0 +1,15 @@
+{
+  "slug": "builder-toolkit-2026",
+  "title": "What is the builder's toolkit in 2026?",
+  "summary": "The AI builder's 2026 toolkit is a stack of six layers: model, IDE, deployment, data, payments, and agent infrastructure. Together they cost a few hundred dollars a month. Three years ago the equivalent required a DevOps team and ten thousand a month.",
+  "editorialPillar": "building",
+  "topic": "tools",
+  "author": "tbw-ai",
+  "contributors": [],
+  "publishedAt": "2026-04-17",
+  "lastReviewedAt": "2026-04-17",
+  "status": "published",
+  "license": "CC BY 4.0",
+  "citations": [],
+  "relatedArticles": ["what-is-ai-building", "what-is-an-ai-agent"]
+}

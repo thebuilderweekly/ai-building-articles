@@ -1,0 +1,117 @@
+# What is prompt engineering?
+
+Prompt engineering is the craft of writing instructions to AI that produce reliable, specific output. Engineering because the work is systematic, repeatable, and testable. Not a trick. Not a hack. A discipline.
+
+That's the definition. Read it twice. The rest of this article explains why "engineering" is the correct word, what a real prompt looks like when you take it apart, and how to iterate on prompts the same way you iterate on code.
+
+## Why engineering is the right word
+
+People mock the phrase "prompt engineering" because they think a prompt is a sentence you type once. That is a user prompt. It is not what builders write.
+
+A production prompt is a document. It has structure. It has versions. It is tested against inputs. It is checked for regressions when you change it. It lives in source control. It has comments explaining why each line is there. When the output breaks, you read the prompt the way you read code: line by line, asking which instruction produced which behavior.
+
+**Systematic.** The same prompt produces the same kind of output across runs. Not identical text, because models are non-deterministic. The same shape, the same tone, the same structure, the same quality floor. If your prompt produces great output one day and garbage the next, the prompt is not systematic yet. There is an instruction missing that the good runs supplied by luck.
+
+**Repeatable.** You can hand the prompt to another builder and they will get output in the same range. The prompt does not depend on your vibes. It depends on what is written down. A repeatable prompt is a prompt that a new teammate can read and understand why each line earns its spot.
+
+**Testable.** You can define what good output looks like and check the prompt's output against that definition. A test is an input and an expected property of the output. "Given this customer email, the reply must mention the refund policy and must not promise a specific refund amount." That is a testable assertion. Write fifty of those. Run them every time you change the prompt. The prompt that passes fifty tests is a prompt you can ship.
+
+**Version-controlled.** The prompt is in a git repo. It has a history. When the output regresses, you run `git log` on the prompt file and find the change that broke it. If your prompts live in a Slack thread or a Notion doc or your head, you are not doing engineering. You are doing folklore. Folklore is fine for one-off tasks. It breaks when the prompt feeds a system that runs a thousand times a day.
+
+The word "engineering" is earned by the practice, not by the title. A person writing one-shot prompts to a chatbot is not a prompt engineer. A person writing prompts that feed a production agent and treating those prompts as code is.
+
+## The five elements of a good prompt
+
+Every prompt worth shipping has five elements. Skip one and the output quality drops to whatever the model happens to guess about the missing piece.
+
+**Role.** Who the model is. Not a costume. A functional description of what it is doing and whose voice it is using. "You are a senior editor at a technical magazine. You read for clarity, accuracy, and a direct voice. You cut sentences that are not earning their place." That is a role. It is specific enough that the model's behavior narrows. "You are a helpful assistant" is not a role. It is the default the model already has. Writing a role means telling the model which of its many behaviors to run, not describing it as a generic helper.
+
+**Context.** What the model needs to know to do the job. The customer's order history. The policy document. The product's tone of voice. The user's goal. The three failure cases the model has to handle. Context is the set of facts that change what the right answer is. If you would need to read a doc before answering, put that doc in context. If you would need to know the user's past behavior, put that in context. Models do not guess context correctly; they guess plausibly, which is worse.
+
+**Task.** What you want the model to do. Name it precisely. "Summarize this article." Fine. "Write a one-paragraph summary of this article that a busy founder reads in fifteen seconds and knows whether to read the full piece." Better. The task is the verb plus the shape of the output plus the audience plus the success criterion. The more of those four you supply, the less the model has to guess.
+
+**Format.** The shape of the output. JSON with this schema. Markdown with these headers. A single sentence under twenty words. Three bullet points, each starting with a verb, each under ten words. Format is where most prompts leak quality. The model produced content you wanted, in a shape you did not, and now downstream code breaks on parsing. Specify the format down to the punctuation when the output feeds another system.
+
+**Constraints.** What the model must not do. Do not speculate. Do not cite sources not in the context. Do not use marketing cliches. Do not promise refunds. Do not exceed 100 words. Constraints are the guardrails. They are the lines you will not cross even when the model thinks crossing would help. Without constraints the model defaults to generic safe middle-of-the-road output, which is rarely what you wanted.
+
+Role, context, task, format, constraints. Five elements. Write them down in that order. A prompt missing any of the five is a prompt that will fail in a way you did not anticipate. The failure will not look like the missing element; it will look like the model being "dumb" or "unreliable." The model is doing the best it can with what you gave it.
+
+## System, user, and few-shot: when to use each
+
+Prompts come in three flavors. They are not interchangeable.
+
+**System prompts** set the stable instructions that do not change across calls. The role, the context that stays the same for every run, the constraints that always apply, the format the output always takes. The system prompt is written once per agent, lives in a file, and gets loaded into every call. Treat the system prompt as the configuration of the system. Change it deliberately.
+
+**User prompts** carry the per-call input. The specific customer email. The specific document to summarize. The specific question to answer. User prompts are cheap to write because most of the work is in the system prompt. A good system prompt makes user prompts short; a bad system prompt forces you to re-explain the task in every user message.
+
+**Few-shot examples** show the model what success looks like by example. Two or three input-output pairs before the real input. Few-shot is the single most effective thing you can add to a prompt that is producing output in the right shape but at the wrong quality. The model learns tone, length, structure, and edge-case handling from the examples faster than from instructions. Use few-shot when you have tried to describe the target behavior in words and the output still drifts. Use examples. The drift will narrow.
+
+A common pattern: system prompt sets role and constraints, few-shot examples set quality bar, user prompt supplies the per-call input. This is the shape of most production prompts once they grow past toy status.
+
+Do not put the stable parts of the prompt in the user message. It wastes tokens, makes the prompt harder to audit, and invites version drift when one call sends a slightly different copy of the "same" instructions. The stable parts belong in the system prompt. The variable parts belong in the user prompt. That is the boundary.
+
+## The iteration loop
+
+Prompts are not written. They are iterated. The first version is the starting point. The shippable version is the tenth.
+
+The loop has four steps. Write, test, observe failures, refine. Repeat.
+
+**Write.** Draft the prompt with all five elements. Do not polish. Do not optimize. Get something that runs end to end so the rest of the loop has something to grind against.
+
+**Test.** Run the prompt against a set of real inputs. Not one input. Not three. Twenty, fifty, a hundred. Real inputs from the domain you are shipping into. If you do not have real inputs, stop and get them. A prompt tested on one input is not tested.
+
+**Observe failures.** Read every output. Not the first three. Every one. Mark the failures. Categorize them. "Five outputs were too long. Three missed the policy mention. Two promised a refund. One hallucinated a citation." Categorized failures are the input to refinement.
+
+**Refine.** For each failure category, add an instruction, a constraint, an example, or a context item that addresses the category. "Outputs too long" becomes a format constraint: max 80 words. "Missed the policy mention" becomes a task clarification: every reply must reference the applicable policy section. "Promised a refund" becomes a hard constraint: never commit to a refund amount. "Hallucinated citation" becomes a verification step outside the prompt: check every citation against a known list.
+
+Run the test set again. Count the failures. If the number goes down and no new failure categories appear, the refinement was good. If the number goes down but a new category appears, the refinement solved one problem and created another. That happens. Name the new category and refine again.
+
+The loop ends when the failure rate is under your tolerance for the use case. Low-stakes consumer output tolerates a 10 percent failure rate when a human in the loop catches the rest. High-stakes financial output needs under 0.1 percent and a verification layer outside the prompt. Know your tolerance before you start iterating. Builders who iterate without a tolerance target iterate forever.
+
+Treating prompts like code beats treating them like magic spells. Magic spells work or do not work, and when they do not work you guess at what to change. Code has a failure mode, a log, a diff, a test that catches the regression. Move your prompts into the code camp.
+
+## Common failure modes and fixes
+
+Six failures show up in every prompt that is not working yet. Learn the six and you can diagnose most bad output in a minute.
+
+**Vague instructions.** "Make it good." "Be helpful." "Write a professional reply." The model has no idea what any of these mean. Fix: replace every soft instruction with a specific, observable property. "Good" becomes "under 100 words, no passive voice, opens with the answer." "Professional" becomes "third person, no contractions, formal register."
+
+**Missing constraints.** The model produced output that was technically correct and totally unusable. It mentioned the competitor. It used a word the brand does not use. It was too long. Fix: add the constraint. Do not assume the model will figure it out. It will not.
+
+**No examples.** You described the target behavior in words and the output is close but off. Fix: add two or three examples. Show the model what success looks like. Words describe. Examples demonstrate. The model learns faster from the second than the first.
+
+**No format spec.** The output is content you wanted in a shape you did not. Parsing breaks. Downstream code throws. Fix: specify the format down to the brace. For JSON output, give the schema. For markdown, give the header structure. For prose, give the length and paragraph shape.
+
+**No verification hook.** The prompt produced bad output and no one noticed until a user complained. Fix: add a verification step outside the prompt. A second model reviews the first. A rule-based check runs against the output. A schema validator catches malformed output. Verification is not a prompt problem; it is a system problem. See [What is AI building?](/articles/what-is-ai-building) for why verification is one of the four activities of a real builder.
+
+**Prompt drift.** The prompt started clean and has grown to 2,000 lines as each new failure added a new instruction. The prompt now contradicts itself in three places. Fix: refactor. Pull stable content into the system prompt. Delete instructions that no longer apply. Consolidate overlapping constraints. Treat prompt bloat the way you treat code bloat. It is the same disease.
+
+## Why prompt engineering is both temporary and permanent
+
+Models keep getting better. The instructions you need today to get good output will feel like overkill on the model two years from now. Some of the craft of current prompt engineering is compensating for the current generation's weaknesses. That part is temporary. Models improve, and the prompts get shorter.
+
+The core is permanent. Clear instructions, specific goals, explicit constraints, concrete examples, testable outputs. Those needs do not go away because the model got smarter. The smarter model benefits from the same clarity that the dumber model required. A better engineer writing a better prompt gets more out of a better model, not less.
+
+People who say "prompt engineering will be obsolete" are collapsing the two. The tactics change. The discipline does not. The same person who wrote clear specs for interns in 1995 is writing clear specs for models in 2026. The spec is the skill. The audience shifted.
+
+The builders who treat prompts as code and build iteration loops around them will ship systems that outlast the model generation they were built on. The builders who rely on "just tell the model what you want" will ship systems that worked on the model they shipped against and break when the model underneath updates. This is the same lesson from the [accountability loop](/tutorials/accountability-loop) tutorial applied to prompts instead of to agents: treat the artifact as code or watch it decay.
+
+## Start
+
+Take one prompt you are using in your work today and turn it into an engineered prompt this week.
+
+Pick a prompt you use often. An email drafter. A code review helper. A report summarizer. Any prompt you run more than twice a day.
+
+Write the five elements explicitly. Role. Context. Task. Format. Constraints. If your current prompt does not have all five, fill in what is missing.
+
+Collect ten real inputs. Run the prompt against all ten. Read every output.
+
+Mark the failures. Group them into categories.
+
+For each category, add the instruction, example, or constraint that addresses it.
+
+Run the ten inputs again. Count the failures. Write down the before-and-after numbers.
+
+Move the prompt into a file in a git repo. Commit. Write a one-line commit message describing what changed.
+
+That is prompt engineering. Five elements. Ten inputs. One repo. One week. The gap between "I write prompts" and "I engineer prompts" is this loop. Close it and every agent you build after this will be better because the input to the agent is better. Prompts are the lever. Engineering is how you pull it.

@@ -1,0 +1,15 @@
+{
+  "slug": "what-is-prompt-engineering",
+  "title": "What is prompt engineering?",
+  "summary": "Prompt engineering is the craft of writing instructions to AI that produce reliable, specific output. Engineering because the work is systematic, repeatable, and testable. This article lays out the five elements of a good prompt and the iteration loop that makes prompts hold up.",
+  "editorialPillar": "building",
+  "topic": "craft",
+  "author": "tbw-ai",
+  "contributors": [],
+  "publishedAt": "2026-04-17",
+  "lastReviewedAt": "2026-04-17",
+  "status": "published",
+  "license": "CC BY 4.0",
+  "citations": [],
+  "relatedArticles": ["what-is-ai-building", "what-is-an-ai-agent"]
+}

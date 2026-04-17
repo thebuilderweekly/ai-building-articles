@@ -1,0 +1,15 @@
+{
+  "slug": "what-is-ai-accountability",
+  "title": "What is AI accountability?",
+  "summary": "AI accountability is the engineered ability to trace a wrong output back to a cause, assign responsibility for fixing it, and prevent recurrence. The agent is not accountable. The builder is.",
+  "editorialPillar": "trust",
+  "topic": "accountability",
+  "author": "tbw-ai",
+  "contributors": [],
+  "publishedAt": "2026-04-17",
+  "lastReviewedAt": "2026-04-17",
+  "status": "published",
+  "license": "CC BY 4.0",
+  "citations": [],
+  "relatedArticles": ["what-is-trust-in-ai-systems", "what-is-outcome-verification"]
+}

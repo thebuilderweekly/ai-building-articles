@@ -1,0 +1,107 @@
+# What is an AI agent?
+
+An AI agent takes a goal, decomposes it into steps, uses tools, and verifies its own output. It is not a chatbot. It is not a script. It is not an API call.
+
+That's the definition. Read it twice. The rest of this article unpacks what each word is doing, where the edges are, and how to tell whether the thing you built is actually an agent or just a wrapper around a model.
+
+## What an agent is not
+
+An agent is not a chatbot. A chatbot takes a message, generates a reply, and waits for the next message. You are the loop. You type, it responds, you decide what to do next. If you walk away, nothing happens. Agents run without you between steps. A chatbot is a single exchange on a timer you set. An agent is a process with its own timer.
+
+An agent is not a script. A script is a fixed sequence of instructions that executes the same way every time. The path is hard-coded. Branching is explicit. The script does not decide anything. It follows the lines you wrote. Agents decide. Given a goal, an agent picks which step to take next based on what it has learned so far. A script that calls a model inside a fixed flow is still a script. The model is a function call, not a planner.
+
+An agent is not an API call. A single call to a language model returns a single response to a single prompt. One turn, one output, done. Agents chain calls, observe the results of each call, and choose the next call based on what came back. Between calls they update state, pick tools, and retry. The unit of work is the loop, not the call.
+
+An agent is not sentient. It does not want anything. It does not think about itself. It does not plan its weekend. When you read that an agent "decided" to do something, read it as "selected from a list of allowed actions given the prompt and the current state." That is the full meaning. The word "decided" is shorthand.
+
+An agent is not AGI. AGI is a claim about general intelligence across every human task. An agent is a narrow system with a specific goal, a specific toolset, and a specific output shape. A customer support agent that resolves refund requests is an agent. It is not AGI. It is not close. It is a piece of software that handles a class of tasks well enough to ship.
+
+An agent is not magic. Every agent in production reduces to a prompt, a loop, a list of tools, and a verification step. If someone describes an agent in a way that does not reduce to those four things, they are selling you something or they are confused.
+
+## Three properties that make something an agent
+
+Three things separate an agent from everything else.
+
+**Autonomy.** The system runs without a human on every step. Once started, it picks the next step, acts, observes the result, and picks the next step again. The human is in the loop for the goal, and for reviewing the output, and for intervening when things go wrong. The human is not in the loop for every click, every call, every decision about which tool to use. If every step requires you to hit a button, it is a workflow with a model inside it. The agent is the thing that runs when you are not there.
+
+**Tool use.** The system calls functions, APIs, other models, databases, files, browsers, code interpreters. It does not just produce text. It produces text that triggers actions, reads the results of those actions, and feeds the results back into its own context. A language model that only emits words is not an agent. A language model that emits words, then calls a search API, then reads the results, then writes a summary, then saves the summary to a file, is behaving as an agent. The distinction is whether the system can change the world outside its own output stream.
+
+**Persistence.** State survives across steps. What the agent learned in step two is available in step five. The system remembers what it has already tried, what it has already looked up, what it has already produced. Without persistence, every step is a fresh prompt with no history, and the agent cannot build on its own work. Persistence can be a scratchpad, a memory file, a vector store, a database row, a message history. The shape does not matter. What matters is that step N has access to steps 1 through N minus 1.
+
+A thing is an agent when all three are true. Remove any one and you have something else. Autonomy without tool use is a model soliloquizing into a text buffer. Tool use without autonomy is a button on a dashboard. Persistence without autonomy is a saved chat history. All three together is an agent.
+
+## The anatomy of an agent
+
+Every agent in production has five parts. Learn the five parts and you can read any agent architecture in the wild.
+
+**System prompt.** The instruction set that tells the agent who it is, what it is trying to do, what it is allowed to do, and how to behave when things get weird. The system prompt is not a throwaway sentence. In a serious agent it is a document. It names the role, lists the available tools, describes the output format, sets the stopping conditions, and gives examples of good and bad behavior. A weak system prompt produces a weak agent. You do not fix a bad system prompt by making the model smarter. You fix it by writing a better prompt. See [What is prompt engineering?](/articles/what-is-prompt-engineering) for the craft of writing prompts that hold up.
+
+**Tools.** The functions the agent can call. Each tool has a name, a description, a schema for its inputs, and a return type the agent can read. A search tool. A file reader. A file writer. A calculator. A database query. An email sender. The tool list is the agent's surface area on the world. Keep it small and sharp. An agent with fifty tools spends its tokens deciding which tool to use and rarely uses any of them well. An agent with five tools that exactly cover the job uses them fast and cleanly.
+
+**Memory.** What the agent remembers across steps and across runs. Short-term memory is the current run's scratchpad: the goal, the steps so far, the tool calls, the observations. Long-term memory is information that persists across runs: a vector store of past conversations, a database of past decisions, a log of past failures. Most agents need both. Many agents ship with only short-term memory and then the builder wonders why the agent keeps making the same mistake across runs. The answer is that nothing was written down.
+
+**Execution loop.** The controller that keeps the agent running. Read the goal. Plan the next step. Pick a tool. Call the tool. Observe the result. Decide whether the goal is done. If not, go back to plan. If yes, produce the final output. Stop. The loop is where the agent happens. Without the loop, you have a prompt and a model, not an agent. The loop has stopping conditions: a max step count, a max token budget, a max wall-clock time, an explicit "I am done" signal from the agent. Stopping conditions keep an agent from running forever when it loses the plot.
+
+**Output verification.** The layer that checks whether the agent's output is actually correct before the output leaves the system. This is the part most builders skip. They build the first four parts, watch the agent run once, see that it produced something that looked right, and ship. Then production hits and the agent is wrong ten percent of the time and no one catches it. Verification can be a second model reviewing the first model's work, a rule-based check against a schema, a unit test on the output, a human in the loop for high-stakes cases, or a retry loop with a different prompt if the output fails. Pick what fits the cost of being wrong. For a deeper treatment of why verification is the line between a demo and a system, see [What is AI building?](/articles/what-is-ai-building) and the [accountability loop](/tutorials/accountability-loop) tutorial.
+
+Five parts. System prompt, tools, memory, execution loop, output verification. Every real agent has all five. If a framework hides one of them from you, learn what the framework is doing on your behalf, because when something breaks you will need to find the part it hid.
+
+## A concrete walk-through
+
+Say you want an agent that answers customer support tickets about refund policy. Walk through the five parts.
+
+The system prompt names the agent's role: "You are a refund-policy support agent for Acme Corp. You answer questions based on the policy document and the customer's order history. You do not promise refunds. You explain policy and surface the customer's options." It lists the tools: a policy lookup, an order history lookup, a ticket reply writer. It names the stopping condition: "You are done when you have either posted a reply or flagged the ticket for human review." It gives two examples of correct behavior and one example of a mistake to avoid.
+
+The tools: `get_policy(topic)` returns the relevant policy section. `get_order_history(customer_id)` returns the customer's past orders and refund history. `post_reply(ticket_id, text)` writes the reply. `flag_for_human(ticket_id, reason)` escalates.
+
+Memory: the current ticket, the customer's order history, the policy sections the agent has already looked up, the draft reply in progress.
+
+The execution loop: read the ticket. Identify the topic. Look up the policy. Look up the order history. Draft a reply. Check the draft against the policy. Post the reply or flag for human. Stop.
+
+Output verification: before `post_reply` is called, a second model reads the draft and the policy and answers one question: "does this reply contradict the policy or promise an outcome the agent is not authorized to promise?" If yes, the agent flags for human instead. If no, it posts.
+
+That is an agent. Five parts. Clear boundaries. Bounded behavior. Verifiable output. If any of the five is missing, the system will fail in production, and the failure will look like the agent being "wrong" when what actually happened is that you shipped without the part that would have caught the wrong answer.
+
+## Three real examples at three complexity levels
+
+**Simplest: the email drafter.** You have an inbox that receives press inquiries. You want an agent that reads the inbox, drafts replies in your voice, and leaves them as drafts for your review. One tool: an email reader and draft writer. Short-term memory: the current email thread. Execution loop: read email, classify type, draft reply, save as draft, move to next. Verification: a rule that blocks the agent from hitting send. This is an agent because it runs on a schedule without you, uses a tool, and persists state across the batch of emails it is processing. It is simple because it does not make consequential decisions. You review every output. The agent saves you the typing, not the judgment.
+
+**Mid: the research agent.** You give the agent a research question: "what do the last five years of clinical trials say about drug X for condition Y?" The agent plans a search strategy, runs web searches, reads papers, takes notes, synthesizes a report, cites its sources. Tools: web search, web page reader, note writer, citation extractor, report compiler. Memory: the search queries tried, the papers read, the notes taken, the citations collected. Execution loop: plan, search, read, note, iterate until coverage is sufficient, synthesize. Verification: a second pass that checks every claim in the report has a citation and that every citation points to a real source. This is meaningfully harder than the email drafter. The agent makes real decisions about what to read, what to trust, and when to stop. Failures are silent: a missing paper, a misread finding, a hallucinated citation. The verification step is the difference between a research agent you can rely on and one you cannot.
+
+**Highest: the multi-agent pipeline.** You are running a daily newsletter. One agent scans the news for stories in your beat. A second agent ranks them for fit. A third drafts a short take on each top story. A fourth writes the issue's editorial. A fifth formats, proofreads, and sends to a human reviewer. Each agent has its own system prompt, its own tools, its own memory, its own verification. They coordinate through a shared state: a database of candidate stories with scores, drafts, reviews, and final copy. The whole thing runs on a schedule every morning. You review the final draft and hit send. This is the far end of what one person can operate, and it is where the compounding starts to feel like a second employee. For the architecture of how these agents coordinate, see [What is an agent team?](/articles/what-is-an-agent-team).
+
+The jump from email drafter to research agent is a jump in judgment. The jump from research agent to multi-agent pipeline is a jump in coordination. Most builders stall at the first jump. A few reach the second. The frontier is further, but most of the value created with agents today is in the middle.
+
+## Why the distinction matters right now
+
+The industry calls a lot of things agents that are not agents. A chatbot with a "agent mode" toggle is usually still a chatbot. A workflow tool with a model in one node is usually still a workflow tool. A script that prompts a model in a loop but has no tools and no memory is usually just a loop.
+
+Calling everything an agent muddles the conversation about what agents can actually do. If you are being sold an "agent" and it does not have autonomy, tool use, and persistence, you are being sold something else. That something else may still be useful. It is not an agent, and the properties you can expect from it are different.
+
+For the builder, the distinction matters because the skill of building an agent is not the skill of writing a good prompt. It is the skill of designing a loop, picking tools, managing memory, and catching bad output before it ships. The prompt is one of five parts. Writing a stunning prompt for a system that has no verification layer is like polishing a car with no brakes. It moves. It does not stop when it should.
+
+The [End of Subsidized AI](/volumes/xi) argument from Volume XI is also relevant here. As the cost of running models settles into its real floor, agents that burn tokens without bounds become economically untenable. The builders who design tight loops, small tool sets, and bounded step counts will ship agents that stay viable after the subsidy ends. The builders who ship loose agents that chat with themselves for hours will watch their cost lines cross their revenue lines.
+
+Volume XII's argument that [AI Alone Is Fragile](/volumes/xii) applies directly. A single-agent system with no fallback, no verification, and no human in the loop will fail in production. The teams that ship agents that last are the teams that assume failure, build for failure, and treat the failure path as part of the core loop.
+
+## Start
+
+Build the simplest real agent you can in one week.
+
+Pick a task in your own work that you do every day and that a junior teammate would handle if you wrote it down. Not a creative task. Not a high-stakes task. A task with a clear input, a clear output, and a correct answer you can recognize.
+
+Write the system prompt. Name the role. List the tools. Describe the output format. Give two examples.
+
+Build exactly the tools the task needs. Not one more. If the task is reading an inbox, build the inbox reader. Do not build a web browser. You will add tools later when you discover you need them.
+
+Add short-term memory: the current task, the steps taken, the observations. Skip long-term memory for the first version. You can add it in version two.
+
+Write the execution loop. Cap it at ten steps. If the agent has not produced output in ten steps, stop and flag for review.
+
+Add one verification step. The simplest one that catches the most common failure. For an email agent, a rule that blocks send. For a research agent, a check that every claim has a citation. For a data agent, a schema check on the output.
+
+Run it on ten real tasks. Read every output. Count how many are correct. Count how many are wrong. The number will be higher than you expected. That is the signal that the verification step needs to be stronger.
+
+Ship it to one person who is not you. Their feedback is the other half of the work.
+
+That is an agent. Five parts. Ten steps. One real user. The gap between "I understand what an agent is" and "I have built one that someone else uses" is three weeks of focused work. Close the gap. The rest of the pillar assumes you have done this.

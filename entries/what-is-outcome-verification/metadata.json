@@ -1,0 +1,15 @@
+{
+  "slug": "what-is-outcome-verification",
+  "title": "What is outcome verification?",
+  "summary": "Outcome verification is the practice of confirming that an agent's action achieved the intended effect, not just that the action executed. It is the difference between the email was sent and the email led to a meeting.",
+  "editorialPillar": "trust",
+  "topic": "verification",
+  "author": "tbw-ai",
+  "contributors": [],
+  "publishedAt": "2026-04-17",
+  "lastReviewedAt": "2026-04-17",
+  "status": "published",
+  "license": "CC BY 4.0",
+  "citations": [],
+  "relatedArticles": ["what-is-trust-in-ai-systems", "what-is-agentic-debt"]
+}

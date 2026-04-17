@@ -1,0 +1,15 @@
+{
+  "slug": "what-is-an-agent-team",
+  "title": "What is an agent team?",
+  "summary": "An agent team is a small set of specialized agents that coordinate to accomplish a goal that would overwhelm a single agent. This article covers why one agent cannot do everything, the three team architectures in production, and how to design clean handoffs between agents.",
+  "editorialPillar": "building",
+  "topic": "architecture",
+  "author": "tbw-ai",
+  "contributors": [],
+  "publishedAt": "2026-04-17",
+  "lastReviewedAt": "2026-04-17",
+  "status": "published",
+  "license": "CC BY 4.0",
+  "citations": [],
+  "relatedArticles": ["what-is-an-ai-agent", "what-is-ai-building"]
+}

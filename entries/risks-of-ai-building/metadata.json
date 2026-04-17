@@ -1,0 +1,15 @@
+{
+  "slug": "risks-of-ai-building",
+  "title": "What are the risks of AI building?",
+  "summary": "The risks of AI building fall into six categories. Each has a known failure mode, a known mitigation, and a severity that maps to the stakes of the output. Managing them is the builder's job, not the model's.",
+  "editorialPillar": "trust",
+  "topic": "risk",
+  "author": "tbw-ai",
+  "contributors": [],
+  "publishedAt": "2026-04-17",
+  "lastReviewedAt": "2026-04-17",
+  "status": "published",
+  "license": "CC BY 4.0",
+  "citations": [],
+  "relatedArticles": ["what-is-trust-in-ai-systems", "what-is-agentic-debt"]
+}
