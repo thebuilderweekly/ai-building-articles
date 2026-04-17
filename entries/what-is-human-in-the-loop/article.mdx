@@ -1,0 +1,117 @@
+# What is human-in-the-loop?
+
+Human-in-the-loop is the design choice of placing a human at specific points in an otherwise-automated workflow to approve, verify, or redirect the output. The right placement is where the cost of error is high and the cost of human attention is low. The wrong placement is anywhere routine.
+
+That's the definition. The rest of this article is about where humans actually belong in an AI workflow, where they become bottlenecks, and how to tune the touchpoints over time as the agent proves itself.
+
+Most teams get human-in-the-loop wrong in one of two ways. They put humans everywhere, which kills throughput and defeats the purpose of automation. Or they put humans nowhere, which produces silent failures that reach users before the team sees them. The right design is specific: humans at the points where their attention has the highest marginal value, and nowhere else.
+
+## The framework for where humans belong
+
+The math is simple. The value of a human touchpoint is the cost of error multiplied by one minus the verification confidence the automated system provides.
+
+High-stakes output with unreliable automated verification needs a human. Low-stakes output with reliable automated verification does not.
+
+An agent drafting a legal contract: high cost of error, and automated verification cannot catch the nuanced judgment calls. A human belongs here. An agent categorizing support tickets into "billing" and "technical": low cost of error, and automated verification works well at this task. A human does not belong here after the first few hundred tickets have confirmed the agent's accuracy.
+
+The framework does not require precise numbers. It requires honesty about two questions. First, what does it actually cost when this agent produces the wrong output? Second, how much confidence does the automated verification layer give me? If the first number is high and the second number is low, a human belongs in the loop. If the first number is low or the second number is high, the human is overhead.
+
+Teams that skip this analysis tend to default to one of the two failure modes. They put humans everywhere because it feels safer. They put humans nowhere because it ships faster. Both defaults waste resources. The analysis takes a morning; the result saves months of misallocated attention.
+
+## Where humans belong
+
+**Final approval for legal, financial, or medical decisions.** Anything where a wrong output carries regulatory, financial, or health consequences that are expensive to reverse. The agent drafts the contract; a human signs it. The agent proposes the trade; a human executes it. The agent suggests the diagnosis; a human confirms it. These touchpoints exist because the cost of an error is measured in lawsuits, lost money, or harm to a person, and no automated verifier is reliable enough to substitute for a human at this stage.
+
+**Edge cases the agent flags as low-confidence.** The agent processes the common case automatically. When it encounters an input it does not know how to handle, it stops and asks. This pattern requires the agent to have calibrated confidence, which is harder than it sounds, but it works when built. The human sees only the hard cases. The easy cases flow through without human attention.
+
+**Creative judgment that requires taste.** Brand voice, design decisions, editorial calls, relationship-sensitive communication. The agent can produce a draft, a layout, a message. The human decides whether it matches the taste that the product requires. Taste is one of the few capabilities that models still handle unevenly, and the cost of a tone-deaf output can be high.
+
+**Relationship-sensitive communications.** Messages to key customers, sensitive internal announcements, responses to upset users. The cost of getting these wrong is damage to a relationship that takes months to repair. The frequency is low enough that a human reviewer does not become a bottleneck.
+
+**Irreversible actions.** Delete, send, publish, transfer money, execute trade. Any action where "undo" is not a real option. The agent prepares the action. The human confirms. This is the single most important place for a human in the loop, because irreversible mistakes are the ones that define whether a product is trustworthy.
+
+The pattern across all five cases: high cost of error, unreliable or absent automated verification, and a frequency low enough that a human's attention is sustainable.
+
+## Where humans do NOT belong
+
+**Middle of execution loops.** An agent that does five steps should not stop for human approval between each step. The compounding value of agent work comes from speed. A human checkpoint in the middle of a loop reduces the agent to human speed for no benefit. If the human is going to review the final output anyway, putting them in the middle is redundant.
+
+**Routine processing that has established verification.** Any step where the agent has run thousands of times, the automated verification layer catches the failure modes that occur, and the success rate is high. A human reviewer at this step adds no information. They rubber-stamp what they see because they have no reason to second-guess it.
+
+**Decisions the agent has been trained on repeatedly with good outcomes.** If the agent has demonstrated reliability across enough runs, in enough variety, the marginal value of a human check drops to near zero. The human is paid to confirm what the data already confirmed.
+
+**Anything the human would rubber-stamp 99 percent of the time.** The rubber-stamp pattern is the failure mode of human-in-the-loop systems that were not designed carefully. A human who approves 99 out of 100 outputs is not providing meaningful review. They are adding latency and providing a false sense of oversight. The one output they catch out of 100 is not worth the overhead on the other 99, especially when the failures tend to be the ones that look normal.
+
+The test for whether a human touchpoint is doing real work: what would happen if you removed it? If the answer is "nothing, because the human always approves anyway," remove it. The human was not providing verification. They were providing ritual.
+
+## The human at the edges model
+
+The best-designed human-in-the-loop systems place the human at the input boundary and the output boundary of the workflow, not in the middle.
+
+The human sits at the input boundary, setting goals and defining constraints. They tell the agent what to do, within what limits, by what deadline. This is where the human's judgment is highest-value: interpreting what the user actually needs, translating a business objective into a specific task. The agent cannot do this well on its own; the task specification is where most agent failures begin.
+
+The middle of the workflow is agent-run. The agent executes against the specification. It uses the tools available. It does the work. No human intervention. The compounding value of agent work is preserved.
+
+The human sits at the output boundary, approving or redirecting the result. They verify the output matches the intent. They decide whether to ship it, iterate on it, or cancel the workflow. This is where the human catches failures that the automated verification layer missed. It is also where the human's taste and judgment apply, which are the capabilities that remain human-bounded for most tasks.
+
+This design maximizes compound throughput while keeping accountability human. The humans in the system are doing the work that humans are uniquely good at: setting intent, making judgment calls on ambiguous outputs. The agents are doing the work that agents are good at: high-throughput execution of well-specified tasks.
+
+The alternative designs, with humans in the middle, fail in predictable ways. Humans become bottlenecks. Throughput drops to human speed. The economic case for building with AI erodes.
+
+## The cost of too much human involvement
+
+Too much human involvement kills agent systems in several compounding ways.
+
+The human becomes a bottleneck. The agent can produce output at a rate the human cannot review. Work piles up in the human's queue. Users wait. The product feels slow.
+
+Throughput drops to human speed. The entire value of the agent, which was to scale beyond human throughput, is lost. The agent is now an expensive typing assistant for a human who is doing most of the real work.
+
+Agents stall waiting for approval. In pipelines with multiple agents, a human checkpoint in the middle blocks downstream agents. The whole system's throughput is the throughput of the slowest human reviewer.
+
+The builder burns out. The people who designed the workflow end up doing the reviews themselves because nobody else can do them consistently. The work that was supposed to free their time becomes work that consumes their time.
+
+The users lose trust in a different way. A product that promises automation but requires human approval for everything feels broken. Users notice that the "AI" is mostly a person behind a curtain. The premium the product was going to charge for automation cannot be charged because the automation is not real.
+
+Too much human involvement is a design failure that often stems from not trusting the agent enough early on. The fix is not to remove humans entirely. It is to remove them from the places where they are not doing real work, and keep them at the places where they are.
+
+## The cost of too little human involvement
+
+Too little human involvement produces the opposite set of failures.
+
+Silent failures. The agent produces wrong output. No human sees it before the user does. The failure propagates into the user's workflow, their decisions, their communications. By the time anyone notices, the damage has spread.
+
+[Agentic debt](/articles/what-is-agentic-debt) accumulates. Every uncaught failure is a future cost, either a user who leaves, a reputation hit, or a cleanup job that takes more time than prevention would have.
+
+Wrong outputs reach users. The product becomes known for producing plausible-but-wrong answers. Users stop trusting it. They start double-checking everything, which means they are doing the verification work the system was supposed to do, and they resent paying for a tool that makes them do it.
+
+Recovery costs exceed prevention costs. When a failure finally surfaces, the team has to investigate what happened, communicate with affected users, fix the root cause, and often pay some form of remediation. All of that takes more time than a human reviewer would have taken to catch the failure before it shipped.
+
+The pattern repeats every time a team under-invests in human touchpoints. They save time upfront. They spend more time downstream on recovery. The net time is always worse.
+
+## How to design the right touchpoints
+
+The design process is iterative. You do not get the touchpoints right on day one. You get them right over months of observation and adjustment.
+
+Start with every step human-reviewed. This is deliberately over-cautious. The first version of the workflow has humans checking everything. The purpose is to learn, not to scale. You are gathering data about what the agent does well and where it fails.
+
+Remove reviews where the agent has proven reliable for 20 or more runs. After the agent has processed enough instances of a given step, at an acceptable accuracy, the human review at that step is redundant. Remove it. Keep the logging so you can re-add the review if the failure rate changes.
+
+Keep reviews where failure costs more than review time. Some touchpoints stay human even after the agent has proven reliable, because the cost of the occasional failure is too high to accept. Legal, financial, and reputation-sensitive decisions often fall into this category.
+
+Adjust monthly. The agent changes. Your data changes. Model providers update. Your user base shifts. What was the right touchpoint design last quarter may not be right this quarter. A monthly review of where humans are in the loop, with data about what they are catching and how often, keeps the design current.
+
+This is the same discipline that applies to automated testing: start broad, prune to what is catching real bugs, add coverage where bugs are getting through. The goal is not to have more or fewer tests. The goal is to have the right tests, in the right places.
+
+The broader principle is that AI systems need engineered scaffolding around them to be reliable. For the full framework, see [what is trust in AI systems](/articles/what-is-trust-in-ai-systems). For the specific case of verifying outcomes rather than actions, see [what is outcome verification](/articles/what-is-outcome-verification). Vol XII (AI Alone Is Fragile) develops the thesis that agent systems require systems around them; human-in-the-loop is one of those systems. The [accountability loop tutorial](/tutorials/accountability-loop) shows how human touchpoints integrate with audit and review infrastructure.
+
+## Start
+
+Audit your current workflows. Pick one. Not all of them.
+
+List every place a human currently reviews the agent's output. For each one, ask: has the agent been reliable for more than 20 runs at this step, with an acceptable failure rate? If yes, mark it as a candidate for removal.
+
+Now list every step where a human does not review the output. For each one, ask: what is the cost if this step produces a wrong output that reaches the user? If the cost is high and the automated verification is weak, mark it as a candidate for adding a human.
+
+You should end up with two lists. One of reviews to remove. One of reviews to add. Make one change from each list this week.
+
+The right human-in-the-loop design is not something you build once. It is something you tune continuously, as the agent improves and the product changes. The discipline is to tune it on purpose, with data, rather than leaving the design frozen in place from the first version.

@@ -1,0 +1,105 @@
+# What is an agent team?
+
+An agent team is a small set of specialized agents that coordinate to accomplish a goal that would overwhelm a single agent. Each agent has one role. Each agent has one toolset. Each agent produces one kind of output. They pass work to each other through typed contracts.
+
+That's the definition. Read it twice. The rest of this article unpacks why one agent cannot carry every job past a certain complexity, what a well-designed team looks like, and how to wire the handoffs so the team does not fall apart in production.
+
+## Why one agent cannot do everything
+
+The first instinct of a builder who has shipped a working agent is to make it do more. Add a tool. Expand the system prompt. Let it handle one more kind of task. This works for a while. Then it stops working, and the failure mode is ugly.
+
+**Context limits.** Every model has a finite context window. A single agent trying to handle research, drafting, editing, formatting, and sending stuffs the entire history of every step into the same window. By step twelve the agent is rereading the project's charter for the fourth time and has no room left to think about the current decision. Even on models with million-token contexts, the cost curve bends. Large context calls are expensive, slow, and noisier than small focused calls. A team with five agents holding 20k tokens each beats one agent holding 100k tokens, on cost and on quality.
+
+**Role confusion.** A system prompt that says "you are a researcher and a writer and an editor and a shipper" produces a mediocre version of each role. The model cannot commit to the voice of any one role because it has to switch voices in the same run. You see this as output that sounds tentative, neither fully analytical nor fully decisive, with the seams showing between modes. Each role wants its own prompt. Stacking them dilutes all of them.
+
+**Quality degrades across tasks.** Models show what researchers call "the alignment tax on multi-role prompting": the more distinct tasks you ask the same agent to perform, the worse it does on each of them. Not because the model got dumber. Because the instructions for each role fight each other. The writer's instruction to "take clear positions" fights the editor's instruction to "neutralize unsupported claims." In one agent these cancel out. In two agents they work in sequence.
+
+**Tool sprawl.** A single agent with thirty tools spends most of its tokens choosing which tool to call. It calls the wrong tool, realizes its mistake, calls a different tool, and burns half its budget before making progress on the task. Five agents with six tools each do the same job in a fraction of the calls because each agent's choice space is small enough to pick correctly.
+
+One agent can hold one job. Past that, you are paying a coordination tax on a system that pretends there is no coordination happening. The honest move is to split the system into agents that each do one job well and make the coordination explicit.
+
+## The team pattern
+
+A real agent team follows three rules. Memorize them.
+
+**One role per agent.** Each agent has exactly one functional description. Researcher. Drafter. Editor. Summarizer. Classifier. Verifier. The role is narrow enough that the system prompt fits on one page and the instructions do not contradict. If you find yourself writing "and also" in a system prompt, you just discovered a second agent.
+
+**One toolset per agent.** Each agent has access to the tools its role requires and nothing else. The researcher has search and read tools. The drafter has a writing scratchpad and a style guide reader. The editor has a diff tool and a critique tool. The shipper has a publish tool. A tool outside the agent's role is not accessible to that agent. This shrinks the decision space, speeds up execution, and contains the blast radius when an agent goes off-script.
+
+**One output per agent.** Each agent produces one kind of structured output. The researcher produces a brief with sources. The drafter produces a draft with metadata. The editor produces an edited draft plus an issues list. The shipper produces a published URL plus a log entry. The output has a schema. The schema is checked. Agents that return freeform text where structured output was expected break the team downstream.
+
+Three rules. One role. One toolset. One output. Every production agent team follows them, whether the builder said so out loud or not. Teams that violate the rules are teams that fail silently in ways that look like the model being bad. The model is doing what you configured. You configured a mess.
+
+## Three architectures
+
+Three shapes cover most real agent teams. Pick the one that matches the work.
+
+**Sequential pipeline.** Agent A produces output. Agent B reads A's output and produces its own. Agent C reads B's output. Linear. One direction. The classic content-production team is a pipeline: researcher, drafter, editor, publisher. Each handoff is typed. Each stage can be tested in isolation. Failure at stage N does not corrupt stages 1 through N minus 1. The pipeline is the right shape when the work has a clear order, each stage transforms the previous one, and the output of each stage is a coherent intermediate.
+
+Concrete example: a daily briefing pipeline. The researcher agent pulls today's news in the beat, tags by topic, and emits a JSON list of candidate stories with urls and summaries. The ranker agent reads the list, scores each story for fit with the publication's voice, and emits the top seven with scores. The drafter agent takes the top seven and writes 200-word takes on each. The editor agent reads every draft against the publication's style guide and emits edited versions plus a list of unresolved issues. The publisher agent reads the edited drafts, composes the email, and sends to the review queue. Five agents. Four handoffs. Each handoff typed. Each agent replaceable without touching the others.
+
+**Parallel fan-out.** A coordinator agent reads the goal and dispatches work to several specialist agents in parallel. Each specialist returns its result. The coordinator collects, merges, and produces the final output. Fan-out is the right shape when the work splits into independent subtasks that can run at the same time. It shortens wall-clock time. It also simplifies each specialist, because each specialist sees only its own subtask rather than the whole goal.
+
+Concrete example: a product launch assistant. The coordinator reads the launch brief and dispatches four specialists in parallel. One writes the press release. One writes the social media thread. One writes the customer email. One writes the internal announcement. Each specialist has its own system prompt tuned to its channel's voice and length. The coordinator waits for all four, reads the results for consistency on facts and dates, and assembles the launch kit. Five agents. One dispatch point. One merge point. Wall-clock time is the slowest specialist, not the sum of all four.
+
+**Supervisor.** A supervisor agent owns the goal and delegates specific subtasks to specialist agents as the work progresses. The supervisor inspects the output of each specialist, decides whether the result is acceptable, and either accepts it, sends it back for revision, or delegates to a different specialist. The supervisor is the only agent with the full picture of the goal; specialists see only their task. This is the shape for work that is too dynamic for a pipeline and too interdependent for parallel fan-out.
+
+Concrete example: a customer incident resolver. The supervisor reads the incident ticket. It delegates to the diagnosis agent: "what category of problem is this, and what is the most likely root cause?" The diagnosis agent returns its hypothesis. The supervisor delegates to the investigator: "verify this hypothesis against the logs and the customer's account history." The investigator returns evidence. If evidence confirms, the supervisor delegates to the remediator: "apply this fix and confirm it resolved the issue." If evidence contradicts, the supervisor sends the diagnosis back with the contradiction and asks for a second hypothesis. The supervisor runs the loop. The specialists do the work. The supervisor ships the outcome.
+
+Pick by the shape of the work, not by what sounds sophisticated. Pipelines are simpler than supervisors. A pipeline that handles 80 percent of the cases beats a supervisor that handles 95 percent of the cases but takes three times longer to build and costs twice as much to run. Start with the pipeline. Upgrade to a supervisor when the pipeline breaks on the long tail of cases.
+
+## The handoff problem
+
+The handoff is where agent teams fall apart. Between each agent there is a contract. The contract says: "the upstream agent produces output in this shape, and the downstream agent reads output in this shape." If the contract is loose, the team works in the happy path and breaks on the edges.
+
+**Typed contracts.** The output of each agent conforms to a schema. JSON with specified fields. Markdown with specified headers. A list of objects with specified keys. The schema is written down. The schema is validated before the output passes to the next agent. An output that fails the schema is a failure, not a coincidence to work around.
+
+**Structured output.** Agents return structured data, not free prose, when prose is going to be parsed. The researcher returns `{"stories": [{"url": "...", "title": "...", "summary": "..."}]}` not "Here are some stories you should look at." The drafter returns `{"draft": "...", "word_count": 187, "topic_tag": "pricing"}` not "Here's my draft." Parsing prose is a lottery. Reading structured data is a guarantee.
+
+**Explicit interfaces.** Every handoff has a defined input shape, a defined output shape, and a defined set of errors. When the downstream agent receives input that fails the contract, it raises a clean error, not a confused response. The error routes to the supervisor, the coordinator, or a retry loop. The team handles contract failures the way good code handles exceptions: explicitly, with a known path, not by soldiering on with bad data.
+
+Loose handoffs break at scale because the edge cases accumulate. Ten runs a day with a 5 percent contract failure is a tolerable mess; one run of those ten is wrong. A thousand runs a day with the same 5 percent is fifty wrong outputs a day, and now someone is reading them all to figure out what went wrong. Tight handoffs shrink the 5 percent to under 1 percent, and the 1 percent routes to a clear retry or escalation path.
+
+The handoff is a design artifact. You do not discover it after the team is built; you design it before you write the first agent. Write the contracts first. Then write the agents that honor them. This is the same lesson that [What is AI building?](/articles/what-is-ai-building) makes about systemizing: the system is the contracts between components, not the components themselves. Teams that skip the contract design stage end up with contracts anyway, just implicit ones that nobody reviews and nobody tests.
+
+## When to use a team and when a single agent is enough
+
+Resist the urge to start with a team. A team is harder to build, harder to debug, and more expensive to run than a single agent. Start with one agent. Add agents only when the single agent hits the limits named above.
+
+Use a single agent when:
+
+**The task fits in one role.** "Draft replies to customer emails" is one role. "Triage customer emails and draft replies" is borderline. "Triage customer emails, draft replies, route escalations, and follow up on open tickets" is four roles, and pretending it is one will produce a mediocre version of each.
+
+**The context fits in one window.** If everything the agent needs to know fits in 30k tokens of context and stays there for the run, one agent is fine. When the agent needs to read a 200-page policy and 50 past tickets to answer one question, you need a team where one agent retrieves and one agent answers.
+
+**The tools fit in one toolset.** If five or six tools cover the task, one agent holds them. If the task touches twenty different systems, each with its own authentication and its own quirks, the agent is going to spend its tokens selecting tools and getting authentication wrong.
+
+Use a team when:
+
+**The task has distinct phases.** Research, drafting, editing, publishing. Diagnosis, investigation, remediation. Detection, classification, response. Phases are a natural seam to split along.
+
+**The task has independent subtasks.** Write four pieces of collateral. Summarize ten documents. Translate a message into five languages. Independent work wants parallel agents.
+
+**Quality demands a separate reviewer.** When you need a different agent to catch the first agent's mistakes, you are in team territory. Verification done by the same agent that produced the output is weaker than verification done by a second agent with its own prompt and its own tools. See Volume XII's argument that [AI Alone Is Fragile](/volumes/xii) for why systems without a second pair of eyes break in production.
+
+Cost is the other lever. The [End of Subsidized AI](/volumes/xi) from Volume XI means every extra agent is a line on the cost side of the ledger. Five agents that each cost one cent per run cost five cents per run. Ten thousand runs a month is five hundred dollars. Teams that add agents without counting pay a cost curve they did not plan for. Build the team you need, not the team that sounds impressive.
+
+## Start
+
+Build a two-agent team this week.
+
+Pick a task you have already automated with a single agent. If you do not have one, stop here and go build one; a two-agent team is a step up from a one-agent system, not a starting point. See [What is an AI agent?](/articles/what-is-an-ai-agent) for the single-agent version.
+
+Identify the natural seam. Where does the work split cleanly into two phases? Research and write. Draft and edit. Classify and act. Generate and verify. The seam is where the output of phase one is a stable intermediate that phase two reads.
+
+Define the contract at the seam. Write it out. JSON schema. Markdown format. Named fields. This is the hardest part. Spend an hour on it. A sloppy contract will cost you a day of debugging later.
+
+Split the single agent into two. Each has its own system prompt. Each has its own toolset. Each produces its own output. The upstream agent writes output that matches the contract. The downstream agent reads output that matches the contract.
+
+Add schema validation at the handoff. Before the downstream agent runs, check that the upstream output conforms. If it does not, fail loud. Do not paper over it.
+
+Run the team on the ten inputs you ran the single agent on. Compare the output quality. Count the failures. Read every output. If the team is better on some cases and worse on others, you just learned where your contract needs work.
+
+Ship the team to one user who is not you. Watch what breaks. What breaks will be the contract, not the agents. Fix the contract. Ship again.
+
+That is an agent team. Two agents. One seam. One contract. One user. The move from a one-agent system to a two-agent team is the move from a person with a tool to a person with a workflow. The move from a two-agent team to a five-agent team is the same move at the next scale. Every jump is the same jump: find the seam, write the contract, split the work, validate the handoff, ship to a real user.

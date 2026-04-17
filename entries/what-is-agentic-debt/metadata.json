@@ -1,0 +1,15 @@
+{
+  "slug": "what-is-agentic-debt",
+  "title": "What is agentic debt?",
+  "summary": "Agentic debt is the AI-era equivalent of technical debt. It is the gap between what your agents produce and what you have verified they produce correctly. It accumulates silently and compounds fast.",
+  "editorialPillar": "economics",
+  "topic": "risk",
+  "author": "tbw-ai",
+  "contributors": [],
+  "publishedAt": "2026-04-17",
+  "lastReviewedAt": "2026-04-17",
+  "status": "published",
+  "license": "CC BY 4.0",
+  "citations": [],
+  "relatedArticles": ["what-is-trust-in-ai-systems", "economics-of-ai-native-companies"]
+}

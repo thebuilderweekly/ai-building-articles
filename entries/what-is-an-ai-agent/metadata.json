@@ -1,0 +1,15 @@
+{
+  "slug": "what-is-an-ai-agent",
+  "title": "What is an AI agent?",
+  "summary": "An AI agent takes a goal, decomposes it into steps, uses tools, and verifies its own output. This article draws the line between an agent and a chatbot, a script, or an API call, and walks through what goes inside one.",
+  "editorialPillar": "building",
+  "topic": "foundations",
+  "author": "tbw-ai",
+  "contributors": [],
+  "publishedAt": "2026-04-17",
+  "lastReviewedAt": "2026-04-17",
+  "status": "published",
+  "license": "CC BY 4.0",
+  "citations": [],
+  "relatedArticles": ["what-is-ai-building", "who-is-an-ai-builder"]
+}
