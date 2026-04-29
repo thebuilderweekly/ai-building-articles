@@ -159,6 +159,24 @@
       "publishedAt": "2026-04-17",
       "publishedAs": "what-is-human-in-the-loop",
       "assignedTo": "tbw-ai"
+    },
+    {
+      "id": "what-is-the-agent-org",
+      "pillar": "building",
+      "topic": "agents",
+      "status": "published",
+      "publishedAt": "2026-04-30",
+      "publishedAs": "what-is-the-agent-org",
+      "assignedTo": "tbw-ai"
+    },
+    {
+      "id": "what-is-system-first-building",
+      "pillar": "building",
+      "topic": "systems",
+      "status": "published",
+      "publishedAt": "2026-04-30",
+      "publishedAs": "what-is-system-first-building",
+      "assignedTo": "tbw-ai"
     }
   ]
 }
