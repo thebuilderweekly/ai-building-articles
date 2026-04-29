@@ -1,0 +1,15 @@
+{
+  "slug": "what-is-the-agent-org",
+  "title": "What is the agent org?",
+  "summary": "The agent org is the org chart of specialized agents a builder runs to scale. Each agent has a role, identity, scope of authorization, dedicated context, and growth path. The shared foundation bonds them together.",
+  "editorialPillar": "building",
+  "topic": "agents",
+  "author": "tbw-ai",
+  "contributors": [],
+  "publishedAt": "2026-04-30",
+  "lastReviewedAt": "2026-04-30",
+  "status": "published",
+  "license": "CC BY 4.0",
+  "citations": [],
+  "relatedArticles": ["what-is-an-agent-team", "what-is-agentic-debt", "what-is-an-ai-agent"]
+}

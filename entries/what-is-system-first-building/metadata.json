@@ -1,0 +1,15 @@
+{
+  "slug": "what-is-system-first-building",
+  "title": "What is system-first building?",
+  "summary": "System-first building means constructing the verification, monitoring, deployment, and feedback infrastructure before you ship the AI feature. AI alone is fragile. AI inside a system is reliable.",
+  "editorialPillar": "building",
+  "topic": "systems",
+  "author": "tbw-ai",
+  "contributors": [],
+  "publishedAt": "2026-04-30",
+  "lastReviewedAt": "2026-04-30",
+  "status": "published",
+  "license": "CC BY 4.0",
+  "citations": [],
+  "relatedArticles": ["what-is-agentic-debt", "what-is-outcome-verification", "what-is-ai-accountability"]
+}
