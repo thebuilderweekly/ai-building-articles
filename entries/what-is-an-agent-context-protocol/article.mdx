@@ -1,0 +1,97 @@
+# What is an agent context protocol?
+
+An agent context protocol is the structured contract that lets one agent or tool hand context to another agent without a human reformatting the data. It defines the schema of the payload, the identity of each side, the way capabilities are discovered, and the way errors are handled. The most adopted example is MCP, the Model Context Protocol from Anthropic. The concept is broader than any single implementation.
+
+That is the definition. The rest of this article unpacks why agents need protocols at all, what MCP actually is and who is using it, what a good context protocol provides, what is emerging beyond MCP, the trade-off protocols force, and how to evaluate one before you adopt or build it.
+
+The reason this article exists is that builders have started reading about the [coordination layer](/articles/what-is-the-coordination-layer) and asking what the protocol piece really is. The other three components of the layer are familiar from years of system design. State, events, identity. The protocol is the new part. It is also the part where the most useful work in the agent stack is happening right now.
+
+## Why agents need protocols
+
+The first version of an agent reaching for a tool always looks the same. The builder wires the agent to the API directly. Custom code reads the API docs, formats the request, parses the response, handles the errors. The wire works. The agent uses the tool. Ship it.
+
+Then a second agent needs the same tool. The builder writes the same wire again, slightly different, because the second agent's prompt expects the data in a different shape. Then a third tool needs to talk to the first agent. New wire. New formatting. New error handling. Three months in, every agent-to-tool connection is bespoke glue, and adding the eleventh tool means writing the eleventh wire by hand.
+
+This is the integration explosion that protocols solve in every other system. It is the reason there is a SQL standard, an HTTP standard, an OAuth standard. When every pair of systems has to negotiate a private contract, the cost of adding the next system grows with the square of the count. When every system speaks the same protocol, the cost of adding the next system is constant.
+
+Agents make the integration explosion worse, not better. An agent does not just call a tool. It reasons about whether to call the tool. It needs to know what the tool can do, what arguments it expects, what the response will look like, what to do when the call fails. Without a shared protocol, every one of those questions has to be answered in the agent's prompt, the tool's wrapper, or the human glue between them. The agent ends up with thirty pages of system prompt explaining how to talk to ten different tools. That is not an agent. That is a translator.
+
+A protocol moves the explanation out of the prompt and into a contract that both sides understand without anyone teaching them. The agent asks the tool what it can do. The tool answers in a known format. The agent picks a capability and calls it. The tool runs and returns a known response shape. The agent does not need to be taught the tool's API by a builder. It learns the API at runtime from the protocol.
+
+## MCP as the canonical example
+
+The Model Context Protocol shipped from Anthropic in late 2024 and became the most adopted agent context protocol over the next eighteen months. By mid-2026, MCP servers exist for most major SaaS tools, every major editor, the leading databases, and the file system itself. Claude, Cursor, Windsurf, and the other agent-native editors all speak it. New tools that want to be agent-callable ship an MCP server alongside their REST API as a matter of course.
+
+What MCP actually is, in plain terms, is a JSON-RPC protocol with a small set of opinionated message types. A server advertises a list of tools, each with a name, a description, and a JSON schema for its arguments. A client (the agent) calls a tool by name with arguments that match the schema. The server runs the tool and returns a structured response. The agent reads the response. That is the core. There are also resources (read-only context the agent can fetch) and prompts (parameterized templates the server can offer the agent). Everything else is detail.
+
+What MCP got right is the radical simplicity of the contract. Every tool, regardless of what it does, exposes the same three or four message types. Every agent, regardless of who built it, calls them the same way. The contract is small enough to implement in an afternoon and big enough to cover most of what an agent needs to do with a tool.
+
+What MCP got right next is the runtime discovery. The agent does not need to be programmed with the tool's API at training time. The agent connects to the server, asks "what can you do," reads the answer, and picks. New tools land in the agent's reach the moment a new server is wired up. The agent gets capabilities at the speed of the ecosystem, not the speed of the model team's release cycle.
+
+The shape of MCP shaped the shape of agents themselves. Before MCP, an agent that wanted to be useful had to be retrained or re-fine-tuned every time a new tool mattered. After MCP, an agent that speaks the protocol can use any tool that ships a server. The model is the brain. The protocol is the nervous system. The tools are the limbs. The split is the design that builders are now organizing the rest of the coordination layer around.
+
+## What a good context protocol provides
+
+Whether the protocol is MCP or something newer, the same four properties separate a real context protocol from a custom wire wearing the word protocol on it.
+
+**Schema.** Every message in the protocol has a typed structure. Arguments are validated. Responses are validated. An agent cannot call a tool with the wrong shape and have the call silently corrupt downstream state. The schema is enforced on both sides. This is the difference between a protocol and a polite suggestion.
+
+**Identity.** Every party in the protocol can name itself. The agent knows which server it is talking to. The server knows which agent is calling. The identity travels with every message. When something breaks, the logs say "Agent X called Tool Y on Server Z," and the breakage points to one party. Without identity, an error in a chain of three handoffs requires the builder to reconstruct who did what from timestamps. With identity, the chain reads itself.
+
+**Capability discovery.** The agent can ask the server what it can do. The server answers in the same protocol. The agent does not need to know the server's API ahead of time. New capabilities show up the moment the server adds them. Old capabilities can be deprecated cleanly because the discovery answer is the source of truth, not a stale doc page. Discovery is what makes the protocol grow without breaking the agents already running on it.
+
+**Error model.** When something fails, the protocol has a way to say so. The agent receives a structured error with a code, a message, and enough context to retry, escalate, or surface to a human. Errors are not hidden inside response bodies. Errors are not stack traces leaking out the side. The agent treats an error like a first-class outcome, the same way it treats a successful response. Without an explicit error model, every failure is a custom mystery, and the agent eventually starts treating any unexpected output as an error, which means real outputs get retried into the ground.
+
+A protocol that has all four properties earns the name. A protocol missing any of them is a wire dressed up. The four properties are the contract. They are also the bar to clear before adopting one or building one.
+
+## Beyond MCP: emerging patterns
+
+MCP is the most visible context protocol, not the only one. The agent stack is producing patterns alongside MCP that handle cases the protocol was not designed for.
+
+**In-band context.** Modern models accept structured context inside the same message stream as the prompt. Tool results, retrieval results, prior agent outputs all show up as typed blocks the model can reason about. The protocol here is the model's own input format, not a separate JSON-RPC wire. The trade-off is that in-band context is bound to the model. Move to a different model and the format changes. MCP works with any model that can call a function. In-band context works with the specific model that defined it.
+
+**Structured outputs.** Models can be asked to emit responses against a JSON schema. The output is validated at generation time. An agent that calls a tool and reads its result can hand the structured output to the next agent without parsing free text. This is the hand-off equivalent of MCP for agent-to-agent communication. It is younger than MCP and less standardized. It is also where the most progress is happening on the agent-to-agent piece.
+
+**Agent-to-agent handoffs.** The protocol that lets one agent invoke another is the active research area as of 2026. MCP describes agent-to-tool calls. Agent-to-agent calls have additional concerns: how does Agent A authenticate to Agent B, how is the calling context passed, how does B know what A's job actually is, how does B return a result that A can integrate. There are early proposals from multiple labs. None has reached MCP's level of adoption. The space is open, which means a builder who wants to ship something durable on top of agent-to-agent comms is making a bet on which proposal wins.
+
+**Schema-first capability registries.** A handful of platforms now publish a registry of capabilities (tools, agents, services) that any client can browse. The registry returns schemas for each capability. Clients pick what they need at runtime. This is the next layer above any one protocol: a marketplace where the protocol is the contract and the registry is the directory. The pattern is older than agents, but the agent stack is where it matters now.
+
+The takeaway is not that MCP will be replaced. MCP is the proven layer. The takeaway is that the protocol space is still expanding above MCP, and the operations that organize themselves around protocols, plural, will move faster than the operations that bet on one and freeze.
+
+## The trade-off
+
+Protocols add friction. There is no escaping that. The first version of an agent calling a tool is faster to write as a custom wire than as a protocol-compliant server. For one agent and one tool, the custom wire wins on speed.
+
+The trade flips at scale. The custom wire works for the first pair, then doubles the work for the second pair, then quadruples for the third. The protocol costs more upfront and stays flat after. The break-even is somewhere around three or four agents calling three or four tools, depending on how varied the tools are.
+
+The honest read is that builders who skip the protocol because the first integration is slower are paying the upfront cost in calendar weeks they hide in. They are not saving time. They are deferring it. The deferred work shows up as agentic debt: stacks of custom glue that have to be maintained, tested, and replaced when the next tool changes its API. Every custom wire is a contract with a system that did not promise to keep it. Protocols make the contract explicit and durable. Glue makes the contract implicit and fragile.
+
+The other half of the trade is that protocols are an external dependency. If the protocol's standards body evolves, your agents have to evolve. If the protocol you bet on stops being maintained, your operation has to migrate. These are real costs. They are smaller than the costs of bespoke glue, in the same way that picking a popular database is smaller than the cost of writing your own. Protocols are leverage. Leverage compounds.
+
+## How to evaluate a protocol
+
+Before adopting a context protocol, run it against five questions. The same questions apply if you are tempted to build one of your own.
+
+**One. Does it have all four properties.** Schema, identity, capability discovery, error model. Missing any of them is a no. Custom glue with one of the four nailed is not a protocol.
+
+**Two. Who else is on it.** A protocol with one big adopter is a closed protocol with extra steps. A protocol with several independent implementations is a real ecosystem. MCP passes this test in 2026. Newer entrants need the same scrutiny.
+
+**Three. How does it handle a wrong message.** Send the protocol an intentionally malformed payload. Does it return a structured error, ignore the message, or crash. The answer tells you whether the protocol is engineered for adversarial conditions or only happy paths.
+
+**Four. What is the migration story when the protocol changes.** Every protocol changes. The question is whether the change path is documented and clean, or whether every version bump silently breaks half the deployed servers. Read the protocol's last two breaking-change releases. The shape of those releases is the shape of the next one.
+
+**Five. Can a builder ship a server in an afternoon.** A protocol that takes a week to implement on the server side will not get implemented for the long-tail tools that make the ecosystem useful. The afternoon test is a hard test. Most protocols fail it. The ones that pass are the ones that win.
+
+If you are building a protocol of your own, run the same questions on your own design. If your protocol fails any of them on day one, you are about to build a custom wire and call it a standard. The cost will be paid by every agent that has to integrate with it.
+
+## Start
+
+Pick the most painful agent-to-tool integration you currently maintain by hand. The one with the most custom code, the one that breaks the most often, the one that takes the longest to teach a new agent. Replace it with an MCP server. If the tool already has a server, wire it up and delete the custom code. If it does not, write the server. Most of them are smaller than the custom wire they replace.
+
+Then run the next agent in the chain over the same protocol. Then the third. The protocol pays back at the third connection. By the fifth, the operation feels like a different shape. New agents drop into the existing fabric. New tools are reachable the moment a server exists. The work the builder used to do as glue is the work the protocol now does for free.
+
+The agents you ship over the next year will outlive the wires you write today. The protocol is the contract that lets them survive the changes underneath. Pick one. Use it. Build the rest of the [coordination layer](/articles/what-is-the-coordination-layer) around it.
+
+## Related reading
+
+The context protocol is one of four components of the coordination layer. For the broader infrastructure, see [what is the coordination layer](/articles/what-is-the-coordination-layer). For what an agent actually is and how it uses tools, see [what is an AI agent](/articles/what-is-an-ai-agent). For the discipline that lets a single agent talk to a tool well in the first place, see [what is prompt engineering](/articles/what-is-prompt-engineering). The originating argument for the coordination layer lives in [The Builder Weekly Vol XV](https://thebuilderweekly.com/weekly/vol-15-youre-the-bottleneck).

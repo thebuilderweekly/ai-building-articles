@@ -1,0 +1,15 @@
+{
+  "slug": "what-is-an-agent-context-protocol",
+  "title": "What is an agent context protocol?",
+  "summary": "An agent context protocol is the structured contract that lets one agent or tool hand context to another agent without a human reformatting the data. MCP is the most adopted example. Without a protocol, every agent-to-agent and agent-to-tool integration is bespoke glue.",
+  "editorialPillar": "building",
+  "topic": "protocols",
+  "author": "tbw-ai",
+  "contributors": [],
+  "publishedAt": "2026-05-07",
+  "lastReviewedAt": "2026-05-07",
+  "status": "published",
+  "license": "CC BY 4.0",
+  "citations": [],
+  "relatedArticles": ["what-is-the-coordination-layer", "what-is-an-ai-agent", "what-is-prompt-engineering"]
+}
