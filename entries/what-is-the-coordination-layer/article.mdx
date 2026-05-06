@@ -1,0 +1,93 @@
+# What is the coordination layer?
+
+The coordination layer is the infrastructure between specialized agents that lets them share state, route work, and operate without a human copy-pasting context between windows. It is shared state, an event bus, identity and permissions, and a context protocol. Together those four pieces are what turn a pile of agents into one operation.
+
+That is the definition. The rest of this article unpacks where the term comes from, why a human in the middle of every handoff fails at scale, what each of the four components does, what good looks like in practice, why MCP alone does not get you there, and what happens to the operation that never builds the layer.
+
+The term coordination layer was named by Mike Molinet and Govind Kavaturi in [Volume XV of The Builder Weekly](https://thebuilderweekly.com/weekly/youre-the-bottleneck), published May 6, 2026. The framing arrived because builders had read the agent org playbook, hired the agents, and then discovered the agents could not work together without the builder gluing them by hand. The agent org tells you who the specialists are. The coordination layer is the floor those specialists stand on.
+
+## Why human-as-middleware fails at scale
+
+The first version of an agent operation always looks the same. The builder runs three or four agents in different windows. Output from one gets pasted into the prompt for the next. A research agent finishes a brief, the builder copies it, opens the drafter, pastes it in, runs the drafter, copies the draft, opens the editor, pastes again. The work ships. The builder is exhausted.
+
+This is human middleware. It is the same pattern Vol I named two years ago, only the operators have changed. In Vol I the builder was middleware between SaaS tools that did not talk to each other. Now the builder is middleware between agents that do not talk to each other. The form changed. The bottleneck did not.
+
+The failure modes show up the day you try to grow. Every new agent multiplies the handoffs the builder has to manage. Three agents need three pairs of connections. Five agents need ten. Ten agents need forty-five. The builder runs out of hours before the agents run out of work. The operation hits a ceiling that no model upgrade fixes, because the bottleneck is not the model. It is the human routing the work between models.
+
+The honest read is that the builder is the same kind of legacy infrastructure that broke before. A person sitting between two systems, translating, formatting, retrying. The work the agents do is fast. The work between the agents is slow. The slow part is the whole operation now.
+
+## Where the term comes from
+
+The agent org pattern from Vol XIV explained how to break one overstuffed agent into specialists with roles, identities, scopes, contexts, and growth paths. That work was right. It was also incomplete. An agent org with no coordination layer is a list of agents on an org chart, not an operation that runs.
+
+Vol XV named the gap. The agent org is the people. The coordination layer is the building they work in. Without the building, the people show up to a parking lot every morning and shout at each other across it. With the building, every specialist has a desk, a phone, a way to ping the next person, and a set of rules everyone obeys.
+
+The coordination layer is what most teams skip first and discover last. It is not a model. It is not a prompt. It is the boring infrastructure between the agents. Boring is the word that matters. Builders chase models because models are exciting. The coordination layer is plumbing. Plumbing is what makes the rest work.
+
+## The four components of the coordination layer
+
+Every coordination layer has the same four components. Skip any of them and the operation degrades in a predictable way.
+
+**Shared state.** The shared state is one place every agent reads and writes. The PRD lives there. The voice profile lives there. The current operating rules live there. The list of customers, the support history, the active workflows, the latest verification report. Each agent does not carry its own copy of the truth. It reads the truth from the shared state on every run, and writes back what it learned. The shared state is one source. Every agent updates from one well.
+
+Without shared state, every agent runs on its own remembered version of the world. The support agent answers from a help doc that shipped two months ago. The marketing agent talks about a feature that was deprecated last week. Two agents disagree because each has a different stale snapshot in its head. The fix is to put the truth in one place and make every agent fetch it on every run. State drift is the silent failure mode of every operation that skips this step.
+
+**Event bus.** The event bus is how one agent tells another that something happened. A PR is opened. A ticket lands. A customer signs up. A verifier fails. Each of those events fires onto the bus. Agents that care about a given event subscribe to it. Agents that do not care never see it. The bus is the difference between agents that wait for the builder to tell them to run and agents that run themselves.
+
+Triggers without a bus turn into cron jobs and Zaps that no one can find six months later. The bus puts every event in one observable place. When the support agent does not run on a new ticket, the question "did the event fire" has an answer. When the workflow drops a step, the missing event is in the log. The bus is the operation's nervous system. Skipping it is how you end up debugging by intuition.
+
+**Identity and permissions.** Identity is who each agent is on every system the org touches. Permissions are what each identity is allowed to do. The QA agent has read access to every PR and write access only to the PR thread. The marketing agent has draft authority and no publish authority. The support answer agent can reply to routine tickets and cannot touch the database. Identity and permissions are enforced by credentials and policy, not by trust.
+
+The reason identity matters in coordination is that the same agent shows up across many surfaces. The QA agent files a check on a PR, posts a status to Slack, writes a row to the verifier log, calls the deploy API. If those four surfaces see four different identities, nobody can reconstruct what the QA agent actually did. One identity per agent across every system. One permission set scoped to its role. Anything else is a security incident waiting for a bored attacker to find.
+
+**Context protocol.** The context protocol is the typed contract that lets one agent or tool hand context to another agent without a human reformatting the data. Schema. Identity. Capability discovery. Error model. The protocol is what makes a handoff safe at machine speed. The most adopted example is MCP, the Model Context Protocol. The protocol is broader than any one implementation. Every agent-to-agent or tool-to-agent connection in the org runs over a protocol of some kind. If the protocol is bespoke per pair, every new agent doubles the integration work. If the protocol is shared, every new agent plugs into the existing fabric on day one.
+
+The deeper article on what a context protocol is lives at [what is an agent context protocol](/articles/what-is-an-agent-context-protocol). For the coordination layer, the headline is that the protocol is one of the four pieces, not all of them. MCP without shared state, an event bus, and identity is a clean wire to nowhere.
+
+## What good looks like
+
+A working coordination layer is concrete. Here is what one looks like for a small AI-native operation.
+
+Agent A finishes its work. It writes the result to shared state with a typed schema. It fires an event onto the bus that names the event, includes a reference to the result, and carries the agent's identity. Agent B is subscribed to that event. The bus delivers it. Agent B reads the new state, fetches what it needs over the context protocol, runs its job, writes its own result back, fires its own event. The chain continues until the workflow is done.
+
+The builder is not in that chain. The builder set the chain up. The builder watches the bus and the verifier reports. The builder steps in when something fires an exception or when a metric crosses a threshold. The day-to-day operation runs without a human in the middle of every handoff.
+
+That is the shape of an operation that scales. The agents work. The work travels. The builder thinks about the next chain instead of routing the current one. New agents drop into the layer and inherit shared state, the event bus, identity, and the protocol on day one. The cost of adding the eleventh agent is roughly the same as adding the second.
+
+The opposite shape is what most teams have. Agents in tabs. Output in screenshots. Handoffs in the builder's head. New agents take a week to wire because every connection is custom. The eleventh agent never gets built because the builder cannot afford the integration cost.
+
+## Why MCP is not enough on its own
+
+Builders sometimes hear "context protocol" and think the work is done. MCP shipped, the agents can talk to tools, the integrations are clean. The protocol part is solved. So the coordination layer must be solved.
+
+It is not. MCP is one of the four components. It is the wire between an agent and a tool, or one day between two agents. The wire is necessary. The wire is not the layer. A well-wired operation with no shared state still has agents running on stale snapshots of the world. A well-wired operation with no event bus still has the builder remembering to kick off the next agent. A well-wired operation with no identity and permissions still has one credential leak away from a bad day.
+
+MCP solves the protocol problem. It does not solve the coordination problem. The two are easy to confuse because the protocol is the most visible part of the layer. The shared state is a database. The event bus is a queue. Identity is a permissions table. Those parts are old infrastructure with new tenants. They are quiet. They are also load-bearing.
+
+Builders who treat MCP as the whole answer ship the wire and call the operation done. Then they spend the next quarter writing custom glue to do what the other three components were supposed to do. The glue is the agent org's version of agentic debt. The fix is to build the layer as four components from the start, not to bolt on the missing three after the protocol works.
+
+## The risk of skipping the layer
+
+If you do not build the coordination layer, you build the alternative by default. The alternative is more agents, the same builder, and a routing problem that grows faster than any model upgrade can outrun.
+
+**Throughput plateaus.** You can add agents up to the point where the builder runs out of hours to coordinate them. After that, every new agent steals time from the existing ones. The operation hits a ceiling that looks like a model limit and is actually a human limit. The fix is not a better model. The fix is the layer that runs the agents without the human in the middle.
+
+**State drift compounds.** Every agent is operating on its own remembered version of the world. The support agent's facts contradict the marketing agent's facts. The customer reads two different answers in the same week and stops trusting any of them. The drift is invisible until it is the customer's complaint. By then the operation has shipped weeks of contradictions.
+
+**Handoffs go tribal.** The way one agent passes work to the next lives in the builder's head. New team members cannot run a workflow without shadowing the builder for a month. The operation is not transferable. It is a one-person stack that happens to have agents in it.
+
+**Routing burnout.** This is the one that hurts. The builder set out to scale past the limits of one human. The agents shipped. The output sped up. The builder spent the next six months copy-pasting between windows, debugging stale state, kicking off the next step by hand, and watching the agent count outgrow the builder's calendar. The agents save time on every individual task. The builder loses every hour they saved on routing the agents. Net effect: zero. Sometimes negative.
+
+The risk of skipping the layer is not that the agents fail. The agents work. The risk is that the builder becomes the bottleneck their own agent org was supposed to eliminate. The infrastructure that prevents this is the coordination layer. Without it, every agent org caps at the patience of the human in the middle.
+
+## Start
+
+Pick the three handoffs you currently do by hand the most. The research-to-drafter copy-paste. The QA-result-to-deploy ping. The ticket-to-triage routing. Write each handoff down. Then for each handoff, fill in the four components. What state has to be shared between the two agents. What event triggers the second one. What identity each agent uses on each system. What protocol carries the data between them.
+
+Once you have those four answers for one handoff, build it. Put the state in one place. Wire the event onto a bus, even if the bus is one queue with three subscribers. Give each agent its own identity and its own scoped credentials. Pick a context protocol and use it for both ends of the handoff. The first one is the hardest. The second one reuses three of the four pieces. By the fourth handoff the layer is real and the next agent plugs in for free.
+
+The work you are doing right now between the agents is the work the layer eliminates. The earlier you stop being the wire, the further your operation can grow before the next ceiling arrives.
+
+## Related reading
+
+The coordination layer sits under the agent org. For the org chart that runs on top, see [what is the agent org](/articles/what-is-the-agent-org). For the small unit inside the org, see [what is an agent team](/articles/what-is-an-agent-team). For the deeper look at the protocol piece of the layer, see [what is an agent context protocol](/articles/what-is-an-agent-context-protocol). For the discipline that prevents the operation from drifting once it scales, see [what is system-first building](/articles/what-is-system-first-building). The originating argument lives in [The Builder Weekly Vol XV](https://thebuilderweekly.com/weekly/youre-the-bottleneck).
