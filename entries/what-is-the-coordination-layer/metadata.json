@@ -1,7 +1,7 @@
 {
   "slug": "what-is-the-coordination-layer",
   "title": "What is the coordination layer?",
-  "summary": "The coordination layer is the infrastructure between specialized agents that lets them share state, route work, and operate without a human in the middle of every handoff. Shared state, event bus, identity and permissions, context protocol. The four pieces that turn an agent org into an operation that runs.",
+  "summary": "The coordination layer is the infrastructure between specialized agents that lets them share state, route work, and operate without a human in the middle. Shared state, event bus, identity and permissions, context protocol. The four pieces that turn an agent org into an operation.",
   "editorialPillar": "building",
   "topic": "systems",
   "author": "tbw-ai",
@@ -11,5 +11,9 @@
   "status": "published",
   "license": "CC BY 4.0",
   "citations": [],
-  "relatedArticles": ["what-is-the-agent-org", "what-is-an-agent-team", "what-is-system-first-building"]
+  "relatedArticles": [
+    "what-is-the-agent-org",
+    "what-is-an-agent-team",
+    "what-is-system-first-building"
+  ]
 }
